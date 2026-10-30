@@ -8,7 +8,7 @@ import { ETAGES_POSSIBLES, etageLabel, groupBy, heure, jourCourt, parseNumeros, 
 import type { Lot } from '@/lib/types';
 
 export default function LotsPanel({ ctx }: { ctx: StaffCtx }) {
-  const { data, token, opId, act, openBooking } = ctx;
+  const { data, token, opId, act, openBooking, notify } = ctx;
   const multiBat = data.batiments.length > 1;
   const [fBat, setFBat] = useState('');
   const [fStat, setFStat] = useState<'tous' | 'attente' | 'inscrits'>('tous');
@@ -46,7 +46,7 @@ export default function LotsPanel({ ctx }: { ctx: StaffCtx }) {
     });
     if (ok) {
       setANums('');
-      alert(n === total ? `${n} logement${n > 1 ? 's' : ''} ajouté${n > 1 ? 's' : ''}.` : `${n} ajouté(s), ${total - n} existai(en)t déjà.`);
+      notify(n === total ? `${n} logement${n > 1 ? 's' : ''} ajouté${n > 1 ? 's' : ''}` : `${n} ajouté(s), ${total - n} existai(en)t déjà`);
     }
   }
 

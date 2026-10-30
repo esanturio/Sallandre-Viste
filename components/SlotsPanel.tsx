@@ -10,7 +10,7 @@ const DUREES = [15, 20, 30, 45, 60, 90, 120];
 function toMin(t: string) { const [h, m] = t.split(':').map(Number); return h * 60 + m; }
 
 export default function SlotsPanel({ ctx }: { ctx: StaffCtx }) {
-  const { data, token, opId, act } = ctx;
+  const { data, token, opId, act, notify } = ctx;
   const [jours, setJours] = useState<string[]>([]);
   const [d1, setD1] = useState('');
   const [rDe, setRDe] = useState('');
@@ -47,7 +47,7 @@ export default function SlotsPanel({ ctx }: { ctx: StaffCtx }) {
     });
     if (ok) {
       setJours([]);
-      alert(n === totalPrev ? `${n} créneau${n > 1 ? 'x' : ''} créé${n > 1 ? 's' : ''}.` : `${n} créneau(x) créé(s) — ${totalPrev - n} existai(en)t déjà.`);
+      notify(n === totalPrev ? `${n} créneau${n > 1 ? 'x' : ''} créé${n > 1 ? 's' : ''}` : `${n} créneau(x) créé(s) — ${totalPrev - n} existai(en)t déjà`);
     }
   }
 

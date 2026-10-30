@@ -22,6 +22,7 @@ export type StaffCtx = {
   reload: () => Promise<void>;
   act: (fn: () => Promise<unknown>, okMsg?: string) => Promise<boolean>;
   openBooking: (opts?: { creneau?: string; lot?: string }) => void;
+  notify: (m: string) => void;
 };
 
 type Tab = 'planning' | 'lots' | 'creneaux' | 'acces';
@@ -85,7 +86,7 @@ export default function StaffPage({ token, opId, role }: { token: string; opId?:
 
   const isAdmin = data.role === 'admin';
   const op = data.operation;
-  const ctx: StaffCtx = { token, opId: op.id, isAdmin, data, reload: load, act, openBooking: (o) => { setRecap(null); setBooking(o ?? {}); } };
+  const ctx: StaffCtx = { token, opId: op.id, isAdmin, data, reload: load, act, openBooking: (o) => { setRecap(null); setBooking(o ?? {}); }, notify };
 
   const nbLots = data.lots.length;
   const nbResa = data.reservations.length;
