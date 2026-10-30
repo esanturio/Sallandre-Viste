@@ -15,6 +15,8 @@ export type Avis = {
   plages: Plage[];
   sansUtilisation: boolean;
   texteSansUtilisation: string;
+  chasse: boolean;        // ne pas tirer la chasse (travaux sur les évacuations)
+  texteChasse: string;
   contact: string;        // facultatif
   bailleur: string;       // identifiant du bailleur (logo), facultatif
 };
@@ -24,6 +26,9 @@ export const EAU_LABEL: Record<Eau, string> = {
   chaude: 'eau chaude',
   froide_chaude: 'eau froide et eau chaude',
 };
+
+export const TEXTE_CHASSE_DEFAUT =
+  'IMPORTANT : ne tirez pas la chasse d’eau et ne videz aucune eau (évier, lavabo, douche) pendant toute la durée des travaux. Nos techniciens interviennent sur les canalisations d’évacuation : tout ce qui est évacué se déverserait directement sur eux.';
 
 export const TEXTE_SANS_UTILISATION_DEFAUT =
   'Veuillez ne pas utiliser les wc / douches / baignoires / lavabos / éviers / machine à laver & lave-linge car nous remplaçons la canalisation d’évacuation générale des eaux usées & des eaux vannes de l’immeuble.';
@@ -45,6 +50,8 @@ export function avisVide(): Avis {
     plages: [{ jour: '', debut: '09:00', fin: '12:00' }],
     sansUtilisation: false,
     texteSansUtilisation: TEXTE_SANS_UTILISATION_DEFAUT,
+    chasse: false,
+    texteChasse: TEXTE_CHASSE_DEFAUT,
     contact: '',
     bailleur: '',
   };
@@ -111,7 +118,7 @@ export function manques(a: Avis): string[] {
 
 const CLES: [keyof Avis, string][] = [
   ['ville', 'v'], ['emis', 'e'], ['adresse', 'a'], ['residence', 'r'], ['batiment', 'b'], ['eau', 'w'],
-  ['motif', 'm'], ['plages', 'p'], ['sansUtilisation', 's'], ['texteSansUtilisation', 't'], ['contact', 'c'], ['bailleur', 'l'],
+  ['motif', 'm'], ['plages', 'p'], ['sansUtilisation', 's'], ['texteSansUtilisation', 't'], ['chasse', 'f'], ['texteChasse', 'g'], ['contact', 'c'], ['bailleur', 'l'],
 ];
 
 function b64urlEncode(s: string): string {
@@ -131,6 +138,7 @@ export function encoderAvis(a: Avis): string {
   const o: Record<string, unknown> = {};
   const def = avisVide();
   for (const [k, c] of CLES) {
+    if (k === 'texteChasse' && (!a.chasse || a.texteChasse === def.texteChasse)) continue;
     if (k === 'texteSansUtilisation' && (!a.sansUtilisation || a.texteSansUtilisation === def.texteSansUtilisation)) continue;
     if (k === 'plages') { o[c] = plagesValides(a).map((p) => [p.jour, p.debut, p.fin]); continue; }
     const v = a[k];
@@ -165,6 +173,8 @@ export function decoderAvis(code: string): Avis | null {
       plages,
       sansUtilisation: o.s === true,
       texteSansUtilisation: str(o.t, 1000) || def.texteSansUtilisation,
+      chasse: o.f === true,
+      texteChasse: str(o.g, 1000) || def.texteChasse,
       contact: str(o.c, 200),
       bailleur: typeof o.l === 'string' && /^[0-9a-f-]{36}$/i.test(o.l) ? o.l : '',
     };

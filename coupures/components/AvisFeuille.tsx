@@ -43,6 +43,8 @@ export default function AvisFeuille({ a, logo }: { a: Avis; logo?: Logo | null }
 
       {a.sansUtilisation && a.texteSansUtilisation.trim() && <p className="sh-fort">{a.texteSansUtilisation}</p>}
 
+      {a.chasse && a.texteChasse.trim() && <p className="sh-rouge">⚠ {a.texteChasse}</p>}
+
       <p className="sh-gap">
         Nous vous prions, Mesdames, Messieurs, de nous excuser pour la gêne engendrée par cette coupure et nous vous assurons de mettre tout en œuvre pour qu’elle soit la plus courte possible.
       </p>

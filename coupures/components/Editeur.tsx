@@ -161,6 +161,15 @@ export default function Editeur({ token }: { token: string }) {
                   <textarea value={a.texteSansUtilisation} maxLength={1000} rows={4} onChange={(e) => set('texteSansUtilisation', e.target.value)} />
                 </div>
               )}
+              <label className="check rouge">
+                <input type="checkbox" checked={a.chasse} onChange={(e) => set('chasse', e.target.checked)} />
+                <span><b>Ne pas tirer la chasse</b> : avertissement en rouge (techniciens sur les évacuations)</span>
+              </label>
+              {a.chasse && (
+                <div className="field">
+                  <textarea value={a.texteChasse} maxLength={1000} rows={4} style={{ color: '#c0392b', fontWeight: 600 }} onChange={(e) => set('texteChasse', e.target.value)} />
+                </div>
+              )}
             </div>
 
             <div className="card">

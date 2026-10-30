@@ -305,23 +305,23 @@ label.check input { margin-top: 3px; width: auto; }
 .print-only { display: none; }
 
 /* La feuille A4 (dimensions réelles) */
-.sheet { width: 210mm; height: 297mm; padding: 14mm 20mm 0; background: #fff; color: #000; font-family: Arial, Helvetica, sans-serif; font-size: 11.5pt; line-height: 1.35; position: relative; overflow: hidden; }
+.sheet { width: 210mm; height: 297mm; padding: 12mm 20mm 0; background: #fff; color: #000; font-family: Arial, Helvetica, sans-serif; font-size: 11pt; line-height: 1.35; position: relative; overflow: hidden; }
 .sheet p { margin: 0 0 4mm; }
-.sh-head { display: flex; justify-content: center; align-items: center; gap: 8mm; margin-bottom: 6mm; }
-.sh-logo { height: 31mm; width: auto; }
+.sh-head { display: flex; justify-content: center; align-items: center; gap: 8mm; margin-bottom: 3mm; }
+.sh-logo { height: 28mm; width: auto; }
 .sh-head.duo .sh-logo { height: 27mm; }
 .sh-x { font-size: 20pt; color: #8a95a3; }
 .sh-partner { max-height: 22mm; max-width: 55mm; object-fit: contain; }
 .sh-lieu { text-align: right; padding-right: 22mm; }
-.sh-immeuble { margin: 8mm 0 7mm; }
+.sh-immeuble { margin: 5mm 0 5mm; }
 .sh-immeuble div { margin-top: 1mm; }
-.sh-titre { border: 1.2pt solid #000; text-align: center; font-weight: 700; font-size: 20pt; line-height: 1.2; padding: 3mm; margin: 0 0 8mm; }
-.sh-gap { margin-top: 6mm !important; }
-.sh-dates { text-align: center; font-weight: 700; font-size: 16pt; margin: 8mm 0 9mm; line-height: 1.5; }
+.sh-titre { border: 1.2pt solid #000; text-align: center; font-weight: 700; font-size: 20pt; line-height: 1.2; padding: 2.5mm; margin: 0 0 6mm; }
+.sh-gap { margin-top: 5mm !important; }
+.sh-dates { text-align: center; font-weight: 700; font-size: 16pt; margin: 6mm 0 7mm; line-height: 1.5; }
 .sh-vide { color: #999; font-weight: 400; }
 .sh-fort { font-weight: 600; }
-.sh-contact { margin-top: 5mm !important; font-weight: 600; }
-.sh-foot { position: absolute; left: 12mm; right: 12mm; bottom: 8mm; width: calc(100% - 24mm); }
+.sh-contact { margin-top: 4mm !important; font-weight: 600; }
+.sh-foot { position: absolute; left: 12mm; right: 12mm; bottom: 6mm; width: calc(100% - 24mm); }
 
 @media print {
   @page { size: A4; margin: 0; }
@@ -335,3 +335,5 @@ label.check input { margin-top: 3px; width: auto; }
   * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 }
 .plage input { min-width: 0; width: 100%; }
+.sh-rouge { color: #d0021b; font-weight: 700; border: 1.5pt solid #d0021b; padding: 2.5mm 3.5mm; border-radius: 1.5mm; }
+label.check.rouge b { color: #c0392b; }
