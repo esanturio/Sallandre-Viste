@@ -21,6 +21,8 @@ const MESSAGES: Record<string, string> = {
   LOT_INTROUVABLE: 'Ce logement est introuvable.',
   LOT_REQUIS: 'Merci de préciser votre logement (étage et numéro).',
   LOT_DEJA_RESERVE: 'Ce logement a déjà un rendez-vous. Pour le modifier, contactez le gardien.',
+  LOTS_AVEC_RDV: 'Impossible de retirer autant de logements : certains ont un rendez-vous ou ont déjà été visités.',
+  NOM_REQUIS_BAT: 'Merci de donner un nom au bâtiment.',
   LOT_EXISTE_DEJA: 'Ce logement existe déjà à cet étage.',
   BATIMENT_INTROUVABLE: 'Bâtiment introuvable.',
   BATIMENT_A_DES_RESERVATIONS: 'Impossible : des rendez-vous existent dans ce bâtiment.',
