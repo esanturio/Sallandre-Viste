@@ -26,7 +26,7 @@ export type StaffCtx = {
   notify: (m: string) => void;
 };
 
-type Tab = 'planning' | 'lots' | 'creneaux' | 'acces';
+type Tab = 'planning' | 'lots' | 'reglages';
 
 export default function StaffPage({ token, opId, role }: { token: string; opId?: string; role: 'admin' | 'concierge' }) {
   const [data, setData] = useState<OpData | null>(null);
@@ -140,14 +140,17 @@ export default function StaffPage({ token, opId, role }: { token: string; opId?:
           <div className="tabs no-print">
             <button className={tab === 'planning' ? 'on' : ''} onClick={() => setTab('planning')}>Planning<span className="cnt">{nbResa}</span></button>
             <button className={tab === 'lots' ? 'on' : ''} onClick={() => setTab('lots')}>Suivi des logements<span className="cnt">{enAttente}</span></button>
-            {isAdmin && <button className={tab === 'creneaux' ? 'on' : ''} onClick={() => setTab('creneaux')}>Dates et créneaux</button>}
-            {isAdmin && <button className={tab === 'acces' ? 'on' : ''} onClick={() => setTab('acces')}>Liens et réglages</button>}
+            {isAdmin && <button className={tab === 'reglages' ? 'on' : ''} onClick={() => setTab('reglages')}>Créneaux, liens et réglages</button>}
           </div>
 
           {tab === 'planning' && <PlanningPanel ctx={ctx} />}
           {tab === 'lots' && <LotsPanel ctx={ctx} />}
-          {tab === 'creneaux' && isAdmin && <SlotsPanel ctx={ctx} />}
-          {tab === 'acces' && isAdmin && <AccessPanel ctx={ctx} />}
+          {tab === 'reglages' && isAdmin && (
+            <>
+              <SlotsPanel ctx={ctx} />
+              <AccessPanel ctx={ctx} />
+            </>
+          )}
         </div>
       </main>
       <Footer />

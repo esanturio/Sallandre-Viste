@@ -4,7 +4,7 @@ import { useState } from 'react';
 import type { StaffCtx } from './StaffPage';
 import { Modal } from './ui';
 import { rpc } from '@/lib/api';
-import { opTitle, ORIGINE_LABEL, STATUT_LABEL, etageLabel, groupBy, heure, isFuture, jourCourt, jourLong, lotLabel, parisToday, sortLots } from '@/lib/format';
+import { opTitle, ORIGINE_LABEL, etageLabel, groupBy, heure, isFuture, jourCourt, jourLong, lotLabel, parisToday, sortLots } from '@/lib/format';
 import type { Reservation } from '@/lib/types';
 
 const VISITE_LABEL: Record<string, string> = { vu: 'Visité', absent: 'Absent', '': 'À faire' };
@@ -32,7 +32,7 @@ export default function PlanningPanel({ ctx }: { ctx: StaffCtx }) {
     };
     const cMap = new Map(data.creneaux.map((c) => [c.id, c]));
     const bMap = new Map(data.batiments.map((b) => [b.id, b.nom]));
-    const head = ['Statut RDV', 'Date', 'Début', 'Fin', 'Bâtiment', 'Étage', 'Lot', 'Nom', 'Téléphone', 'E-mail', 'Occupant', 'Informations', 'Inscrit', 'Visite', 'Note visite'];
+    const head = ['Statut RDV', 'Date', 'Début', 'Fin', 'Bâtiment', 'Étage', 'Lot', 'Nom', 'Téléphone', 'E-mail', 'Informations', 'Inscrit', 'Visite', 'Note visite'];
     const rows: unknown[][] = [];
     const resaByLot = new Map(data.reservations.map((r) => [r.lot_id, r]));
     const sorted = [...data.reservations].sort((a, b) => {
@@ -43,11 +43,11 @@ export default function PlanningPanel({ ctx }: { ctx: StaffCtx }) {
       const c = cMap.get(r.creneau_id)!;
       const l = lotsById.get(r.lot_id);
       rows.push(['Planifié', c.jour.split('-').reverse().join('/'), c.debut, c.fin, l ? bMap.get(l.batiment_id) : '', l ? etageLabel(l.etage) : '', l?.numero ?? '',
-        r.nom, r.telephone, r.email ?? '', STATUT_LABEL[r.statut], r.commentaire ?? '', ORIGINE_LABEL[r.created_by], VISITE_LABEL[l?.visite ?? ''] ?? '', l?.visite_note ?? '']);
+        r.nom, r.telephone, r.email ?? '', r.commentaire ?? '', ORIGINE_LABEL[r.created_by], VISITE_LABEL[l?.visite ?? ''] ?? '', l?.visite_note ?? '']);
     }
     for (const l of sortLots(data.lots, data.batiments)) {
       if (resaByLot.has(l.id)) continue;
-      rows.push(['En attente', '', '', '', bMap.get(l.batiment_id), etageLabel(l.etage), l.numero, '', '', '', '', '', '', VISITE_LABEL[l.visite ?? ''] ?? '', l.visite_note ?? '']);
+      rows.push(['En attente', '', '', '', bMap.get(l.batiment_id), etageLabel(l.etage), l.numero, '', '', '', '', '', VISITE_LABEL[l.visite ?? ''] ?? '', l.visite_note ?? '']);
     }
     const csv = '﻿' + [head, ...rows].map((r) => r.map(esc).join(';')).join('\r\n');
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
@@ -81,7 +81,7 @@ export default function PlanningPanel({ ctx }: { ctx: StaffCtx }) {
         <div className="card">
           <div className="notice info" style={{ margin: 0 }}>
             {data.creneaux.length === 0
-              ? ctx.isAdmin ? 'Aucun créneau pour l’instant. Créez des dates dans l’onglet « Dates et créneaux ».' : 'Aucun créneau n’a encore été ouvert.'
+              ? ctx.isAdmin ? 'Aucun créneau pour l’instant. Créez des dates dans l’onglet « Créneaux, liens et réglages ».' : 'Aucun créneau n’a encore été ouvert.'
               : 'Aucun créneau à venir.'}
           </div>
         </div>
@@ -119,7 +119,6 @@ export default function PlanningPanel({ ctx }: { ctx: StaffCtx }) {
                           <div className="top">
                             <span className="lot">{l ? lotLabel(l, data.batiments, multiBat) : 'Logement ?'}</span>
                             <span className="who">{r.nom}</span>
-                            <span className="badge grey">{STATUT_LABEL[r.statut]}</span>
                             {l?.visite === 'vu' && <span className="badge vu">Visité ✓</span>}
                             {l?.visite === 'absent' && <span className="badge absent">Absent</span>}
                           </div>

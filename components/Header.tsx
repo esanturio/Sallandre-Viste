@@ -5,7 +5,7 @@ export default function Header({ kicker, title, right }: { kicker?: string; titl
   return (
     <header className="topbar">
       <div className="wrap">
-        <img className="logo" src="/logo-sallandre.png" alt="Sallandre Helios 360" />
+        <img className="logo" src="/logo-sallandre.png" alt="Sallandre" />
         <div className="title">
           {kicker && <div className="k">{kicker}</div>}
           {title && <div className="t">{title}</div>}
@@ -17,5 +17,5 @@ export default function Header({ kicker, title, right }: { kicker?: string; titl
 }
 
 export function Footer() {
-  return <div className="footer">Sallandre · Helios 360</div>;
+  return <div className="footer">Sallandre × BatiBig</div>;
 }

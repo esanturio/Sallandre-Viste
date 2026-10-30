@@ -5,7 +5,7 @@ import Header, { Footer } from './Header';
 import { Toast } from './ui';
 import CoupuresBanner from './Coupures';
 import { errMsg, rpc } from '@/lib/api';
-import { STATUT_LABEL, etageLabel, groupBy, heure, jourCourt, jourLong, lotLabel, mapsUrl, opSub, opTitle, parisToday, sortLots } from '@/lib/format';
+import { etageLabel, groupBy, heure, jourCourt, jourLong, lotLabel, mapsUrl, opSub, opTitle, parisToday, sortLots } from '@/lib/format';
 import type { Batiment, Creneau, Lot, OpData, Reservation, Visite } from '@/lib/types';
 
 function VisiteCard({ lot, batiments, resa, creneau, onSet }: {
@@ -30,7 +30,7 @@ function VisiteCard({ lot, batiments, resa, creneau, onSet }: {
       </div>
       {resa ? (
         <div>
-          <div style={{ fontWeight: 600 }}>{resa.nom} <span className="badge grey">{STATUT_LABEL[resa.statut]}</span></div>
+          <div style={{ fontWeight: 600 }}>{resa.nom}</div>
           <a className="tel" href={`tel:${resa.telephone.replace(/\s/g, '')}`}>📞 {resa.telephone}</a>
           {resa.commentaire && <div className="small" style={{ fontStyle: 'italic', marginTop: 4 }}>« {resa.commentaire} »</div>}
         </div>

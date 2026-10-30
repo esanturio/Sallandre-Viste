@@ -3,7 +3,7 @@ import './globals.css';
 
 export const metadata: Metadata = {
   title: 'Sallandre · Prise de rendez-vous',
-  description: 'Planification des visites et interventions — Sallandre Helios 360',
+  description: 'Planification des visites et interventions — Sallandre × BatiBig',
   robots: { index: false, follow: false },
   icons: { icon: '/logo-sallandre.png' },
 };

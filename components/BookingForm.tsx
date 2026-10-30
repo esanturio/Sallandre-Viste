@@ -36,7 +36,6 @@ export default function BookingForm({ data, staff, initialCreneau, initialLot, s
   const [nom, setNom] = useState('');
   const [tel, setTel] = useState('');
   const [email, setEmail] = useState('');
-  const [statut, setStatut] = useState<Statut | ''>('');
   const [comm, setComm] = useState('');
   const [err, setErr] = useState('');
   const [busy, setBusy] = useState(false);
@@ -90,7 +89,7 @@ export default function BookingForm({ data, staff, initialCreneau, initialLot, s
   const lotChoisi = lotSel && lotSel !== 'autre' ? lots.find((l) => l.id === lotSel) : undefined;
   const logementOk = !!effBat && (lotChoisi ? true : effEtage !== '' && numeroLibre.trim() !== '');
   const telOk = tel.replace(/\D/g, '').length >= 8;
-  const canSubmit = logementOk && !!creneau && nom.trim() !== '' && telOk && statut !== '' && !busy;
+  const canSubmit = logementOk && !!creneau && nom.trim() !== '' && telOk && !busy;
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -100,8 +99,7 @@ export default function BookingForm({ data, staff, initialCreneau, initialLot, s
         !logementOk ? 'Merci de préciser votre logement.' :
         !creneau ? 'Merci de choisir un créneau.' :
         nom.trim() === '' ? 'Merci d’indiquer votre nom.' :
-        !telOk ? 'Merci d’indiquer un numéro de téléphone valide.' :
-        'Merci d’indiquer si vous êtes locataire ou propriétaire.',
+        'Merci d’indiquer un numéro de téléphone valide.',
       );
       return;
     }
@@ -116,7 +114,7 @@ export default function BookingForm({ data, staff, initialCreneau, initialLot, s
         nom: nom.trim(),
         tel: tel.trim(),
         email: email.trim(),
-        statut: statut as Statut,
+        statut: 'autre' as Statut,
         comm: comm.trim(),
       });
       onBooked(r);
@@ -249,14 +247,6 @@ export default function BookingForm({ data, staff, initialCreneau, initialLot, s
       {/* 3. Coordonnées */}
       <div className="card">
         <div className="step-title">{n(3)}<h2>{staff ? 'Coordonnées de l’occupant' : 'Vos coordonnées'}</h2></div>
-        <div className="field">
-          <label>{staff ? 'Statut' : 'Vous êtes'}</label>
-          <div className="seg">
-            <button type="button" className={statut === 'locataire' ? 'on' : ''} onClick={() => setStatut('locataire')}>Locataire</button>
-            <button type="button" className={statut === 'proprietaire' ? 'on' : ''} onClick={() => setStatut('proprietaire')}>Propriétaire</button>
-            {staff && <button type="button" className={statut === 'autre' ? 'on' : ''} onClick={() => setStatut('autre')}>Autre</button>}
-          </div>
-        </div>
         <div className="field">
           <label htmlFor="nom">Nom et prénom</label>
           <input id="nom" type="text" value={nom} onChange={(e) => setNom(e.target.value)} autoComplete="name" maxLength={120} />

@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import type { StaffCtx } from './StaffPage';
 import { rpc } from '@/lib/api';
-import CoupuresPanel from './CoupuresPanel';
+import CoupuresList from './CoupuresPanel';
 import { groupBy, heure, jourCourt, jourLong, parisToday } from '@/lib/format';
 
 const DUREES = [15, 20, 30, 45, 60, 90, 120];
@@ -22,6 +22,9 @@ export default function SlotsPanel({ ctx }: { ctx: StaffCtx }) {
   const [duree, setDuree] = useState(30);
   const [capa, setCapa] = useState(1);
   const [sel, setSel] = useState<Set<string>>(new Set());
+  const multi = data.batiments.length > 1;
+  const [bat, setBat] = useState<string>('');
+  const [coupure, setCoupure] = useState(false);
 
   const addJour = (j: string) => j && setJours((x) => (x.includes(j) ? x : [...x, j].sort()));
   function addPlage() {
@@ -43,12 +46,20 @@ export default function SlotsPanel({ ctx }: { ctx: StaffCtx }) {
     let n = 0;
     const ok = await act(async () => {
       n = await rpc<number>('admin_generate_creneaux', {
-        p_token: token, p_op: opId, p_jours: jours, p_debut: debut, p_fin: fin, p_duree: duree, p_capacite: capa,
+        p_token: token, p_op: opId, p_jours: jours, p_debut: debut, p_fin: fin, p_duree: duree, p_capacite: capa, p_batiment: bat || null,
       });
+      if (coupure) {
+        for (const j of jours) {
+          await rpc('admin_save_coupure', { p_token: token, p_op: opId, p_batiment: bat || null, p_jour: j, p_debut: debut, p_fin: fin });
+        }
+      }
     });
     if (ok) {
+      const nbJ = jours.length;
       setJours([]);
-      notify(n === totalPrev ? `${n} créneau${n > 1 ? 'x' : ''} créé${n > 1 ? 's' : ''}` : `${n} créneau(x) créé(s) — ${totalPrev - n} existai(en)t déjà`);
+      setCoupure(false);
+      const base = n === totalPrev ? `${n} créneau${n > 1 ? 'x' : ''} créé${n > 1 ? 's' : ''}` : `${n} créneau(x) créé(s) — ${totalPrev - n} existai(en)t déjà`;
+      notify(coupure ? `${base} · coupure d’eau ajoutée (${nbJ} jour${nbJ > 1 ? 's' : ''})` : base);
     }
   }
 
@@ -65,10 +76,22 @@ export default function SlotsPanel({ ctx }: { ctx: StaffCtx }) {
 
   return (
     <>
-      <CoupuresPanel ctx={ctx} />
       <div className="card">
-        <h2>Ouvrir des créneaux</h2>
-        <p className="hint">Choisissez les jours, puis la plage horaire et la durée de chaque visite. Les créneaux seront découpés automatiquement.</p>
+        <h2>Ouvrir des créneaux de visite</h2>
+        <p className="hint">Choisissez {multi ? 'le bâtiment, ' : ''}les jours, puis la plage horaire et la durée de chaque visite. Les créneaux sont découpés automatiquement. Cochez « coupure d’eau » seulement si l’eau est coupée pendant ces visites.</p>
+
+        {multi && (
+          <div className="field">
+            <label>Bâtiment</label>
+            <div className="seg">
+              <button type="button" className={bat === '' ? 'on' : ''} onClick={() => setBat('')}>Tous les bâtiments</button>
+              {data.batiments.map((b) => (
+                <button type="button" key={b.id} className={bat === b.id ? 'on' : ''} onClick={() => setBat(b.id)}>{b.nom}</button>
+              ))}
+            </div>
+            {bat && <p className="muted small" style={{ margin: '6px 0 0' }}>Ces créneaux ne seront proposés qu’aux logements de {batNom(bat)}.</p>}
+          </div>
+        )}
 
         <div className="row">
           <div className="field">
@@ -116,6 +139,16 @@ export default function SlotsPanel({ ctx }: { ctx: StaffCtx }) {
             <input type="number" min={1} max={20} value={capa} onChange={(e) => setCapa(Math.max(1, Number(e.target.value) || 1))} />
           </div>
         </div>
+        <label className="flex coupurecheck">
+          <input type="checkbox" checked={coupure} onChange={(e) => setCoupure(e.target.checked)} />
+          <span>
+            <b>💧 Coupure d’eau pendant ces créneaux</b> <span className="muted">(facultatif)</span><br />
+            <span className="small muted">
+              {multi ? (bat ? `Coupure sur ${batNom(bat)}` : 'Coupure sur tout l’immeuble') : 'Coupure sur l’immeuble'}
+              {', '}de {debut.replace(':', 'h')} à {fin.replace(':', 'h')}, chaque jour sélectionné — annoncée aux occupants, au gardien et au technicien.
+            </span>
+          </span>
+        </label>
         <div className="flex">
           <button className="btn" disabled={totalPrev === 0} onClick={generer}>
             Créer {totalPrev > 0 ? `${totalPrev} créneau${totalPrev > 1 ? 'x' : ''}` : 'les créneaux'}
@@ -126,6 +159,8 @@ export default function SlotsPanel({ ctx }: { ctx: StaffCtx }) {
         </div>
         <p className="muted small" style={{ marginBottom: 0 }}>Astuce : pour une pause déjeuner, créez la matinée puis l’après-midi en deux fois avec les mêmes jours.</p>
       </div>
+
+      <CoupuresList ctx={ctx} />
 
       <div className="card">
         <div className="flex" style={{ marginBottom: 10 }}>
