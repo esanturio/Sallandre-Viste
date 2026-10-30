@@ -5,12 +5,13 @@ import Header, { Footer } from './Header';
 import { Toast } from './ui';
 import CoupuresBanner from './Coupures';
 import { errMsg, rpc } from '@/lib/api';
-import { etageLabel, groupBy, heure, jourCourt, jourLong, lotLabel, mapsUrl, opSub, opTitle, parisToday, sortLots } from '@/lib/format';
+import { ETAGES_POSSIBLES, etageLabel, groupBy, heure, jourCourt, jourLong, lotLabel, mapsUrl, opSub, opTitle, parisToday, sortLots } from '@/lib/format';
 import type { Batiment, Creneau, Lot, OpData, Reservation, Visite } from '@/lib/types';
 
-function VisiteCard({ lot, batiments, resa, creneau, onSet }: {
+function VisiteCard({ lot, batiments, resa, creneau, onSet, onDelete }: {
   lot: Lot; batiments: Batiment[]; resa?: Reservation; creneau?: Creneau;
   onSet: (lot: Lot, statut: Visite, note: string) => Promise<void>;
+  onDelete?: (lot: Lot) => void;
 }) {
   const [note, setNote] = useState(lot.visite_note ?? '');
   const [busy, setBusy] = useState(false);
@@ -35,7 +36,10 @@ function VisiteCard({ lot, batiments, resa, creneau, onSet }: {
           {resa.commentaire && <div className="small" style={{ fontStyle: 'italic', marginTop: 4 }}>« {resa.commentaire} »</div>}
         </div>
       ) : (
-        <div className="small muted">Pas de rendez-vous</div>
+        <div className="flex small muted" style={{ justifyContent: 'space-between' }}>
+          <span>Pas de rendez-vous</span>
+          {onDelete && <button className="linkbtn small" style={{ color: 'var(--err)' }} onClick={() => onDelete(lot)}>Supprimer ce logement</button>}
+        </div>
       )}
       <div className="vbtns">
         <button className={`vbtn vu ${lot.visite === 'vu' ? 'on' : ''}`} disabled={busy}
@@ -59,6 +63,10 @@ export default function TechPage({ token }: { token: string }) {
   const [jour, setJour] = useState('');
   const [filtre, setFiltre] = useState<'avoir' | 'tous'>('avoir');
   const [toast, setToast] = useState('');
+  const [ajout, setAjout] = useState(false);
+  const [aBat, setABat] = useState('');
+  const [aEtage, setAEtage] = useState('0');
+  const [aNum, setANum] = useState('');
 
   const load = useCallback(async () => {
     try { setData(await rpc<OpData>('tech_operation', { p_token: token })); setErr(''); }
@@ -97,6 +105,30 @@ export default function TechPage({ token }: { token: string }) {
       alert(errMsg(e));
       load();
     }
+  }
+
+  const flash = (m: string) => { setToast(m); setTimeout(() => setToast(''), 1800); };
+
+  async function ajouterLot() {
+    const bat = aBat || data?.batiments[0]?.id;
+    if (!bat || !aNum.trim()) return;
+    try {
+      await rpc('tech_add_lot', { p_token: token, p_batiment: bat, p_etage: parseInt(aEtage, 10), p_numero: aNum.trim() });
+      setANum('');
+      setAjout(false);
+      setFiltre('tous');
+      await load();
+      flash('Logement ajouté');
+    } catch (e) { alert(errMsg(e)); }
+  }
+
+  async function supprimerLot(l: Lot) {
+    if (!confirm(`Supprimer le lot ${l.numero} (${etageLabel(l.etage)}) ? À utiliser seulement si ce logement n’existe pas.`)) return;
+    try {
+      await rpc('tech_delete_lot', { p_token: token, p_lot: l.id });
+      await load();
+      flash('Logement supprimé');
+    } catch (e) { alert(errMsg(e)); }
   }
 
   if (!data) {
@@ -185,6 +217,37 @@ export default function TechPage({ token }: { token: string }) {
                 <button className={filtre === 'avoir' ? 'on' : ''} onClick={() => setFiltre('avoir')}>Restant à voir</button>
                 <button className={filtre === 'tous' ? 'on' : ''} onClick={() => setFiltre('tous')}>Tous</button>
               </div>
+              {!ajout ? (
+                <button className="btn ghost" style={{ width: '100%', marginBottom: 12 }} onClick={() => setAjout(true)}>+ Ajouter un logement manquant</button>
+              ) : (
+                <div className="card" style={{ padding: 14 }}>
+                  <h3>Ajouter un logement</h3>
+                  {data.batiments.length > 1 && (
+                    <div className="field">
+                      <label>Bâtiment</label>
+                      <select value={aBat || data.batiments[0].id} onChange={(e) => setABat(e.target.value)}>
+                        {data.batiments.map((b) => <option key={b.id} value={b.id}>{b.nom}</option>)}
+                      </select>
+                    </div>
+                  )}
+                  <div className="row">
+                    <div className="field">
+                      <label>Étage</label>
+                      <select value={aEtage} onChange={(e) => setAEtage(e.target.value)}>
+                        {ETAGES_POSSIBLES.map((x) => <option key={x} value={x}>{etageLabel(x)}</option>)}
+                      </select>
+                    </div>
+                    <div className="field">
+                      <label>Numéro</label>
+                      <input type="text" value={aNum} onChange={(e) => setANum(e.target.value)} placeholder="ex. 104, B, Loge" />
+                    </div>
+                  </div>
+                  <div className="btns">
+                    <button className="btn" disabled={!aNum.trim()} onClick={ajouterLot}>Ajouter</button>
+                    <button className="btn ghost" onClick={() => setAjout(false)}>Annuler</button>
+                  </div>
+                </div>
+              )}
               {total === 0 && <div className="notice info">La liste des logements n’a pas été saisie.</div>}
               {total > 0 && lots.length === 0 && <div className="notice ok">Tous les logements ont été visités 🎉</div>}
               {data.batiments.filter((b) => parBat.has(b.id)).map((b) => {
@@ -198,7 +261,7 @@ export default function TechPage({ token }: { token: string }) {
                         <div className="lbl muted" style={{ marginTop: 8 }}>{etageLabel(e)}</div>
                         {parEtage.get(String(e))!.map((l) => {
                           const r = resaByLot.get(l.id);
-                          return <VisiteCard key={l.id} lot={l} batiments={data.batiments} resa={r} creneau={r ? cMap.get(r.creneau_id) : undefined} onSet={setVisite} />;
+                          return <VisiteCard key={l.id} lot={l} batiments={data.batiments} resa={r} creneau={r ? cMap.get(r.creneau_id) : undefined} onSet={setVisite} onDelete={r ? undefined : supprimerLot} />;
                         })}
                       </div>
                     ))}

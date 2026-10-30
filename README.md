@@ -8,7 +8,7 @@ Aucun compte : chaque espace s'ouvre avec un lien secret.
 | Administration | `/admin/<jeton admin>` | Créer les opérations (immeuble, bâtiments), ouvrir les dates et créneaux, suivre, exporter |
 | Gardien | `/c/<jeton gardien>` | Voir le planning et les logements en attente, inscrire / déplacer / annuler des occupants, générer ou compléter les bâtiments et logements |
 | Occupants | `/r/<jeton occupants>` | Choisir son logement, une date et un créneau, laisser ses coordonnées |
-| Technicien | `/t/<jeton technicien>` | Planning du jour, coordonnées, marquer chaque logement « Visité » ou « Absent » avec une note |
+| Technicien | `/t/<jeton technicien>` | Planning du jour, coordonnées, marquer chaque logement « Visité » ou « Absent » avec une note, ajouter un logement manquant ou supprimer un logement saisi par erreur |
 
 L'adresse identifie l'immeuble (suggestions via la Base Adresse Nationale / Géoplateforme IGN, gratuite et sans clé).
 
