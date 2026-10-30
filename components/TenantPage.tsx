@@ -5,6 +5,7 @@ import Header, { Footer } from './Header';
 import BookingForm from './BookingForm';
 import RecapCard from './RecapCard';
 import { errMsg, rpc } from '@/lib/api';
+import { mapsUrl, opSub, opTitle } from '@/lib/format';
 import type { BookingInput, OpData, Recap } from '@/lib/types';
 
 export default function TenantPage({ token }: { token: string }) {
@@ -55,14 +56,15 @@ export default function TenantPage({ token }: { token: string }) {
       <section className="hero">
         <div className="wrap narrow">
           <span className="objet">{op.objet}</span>
-          <h1>{op.immeuble}</h1>
-          {op.adresse && <div className="sub">{op.adresse}</div>}
+          <h1>{opTitle(op)}</h1>
+          {opSub(op) && <div className="sub">{opSub(op)}</div>}
+          {op.adresse && <a className="maplink" href={mapsUrl(op.adresse)} target="_blank" rel="noreferrer">Voir sur Google Maps ↗</a>}
         </div>
       </section>
       <main>
         <div className="wrap narrow">
           {recap ? (
-            <RecapCard r={recap} showBat={data.batiments.length > 1} immeuble={op.immeuble} adresse={op.adresse} />
+            <RecapCard r={recap} showBat={data.batiments.length > 1} immeuble={opTitle(op)} adresse={opSub(op)} />
           ) : (
             <>
               <div className="notice info">

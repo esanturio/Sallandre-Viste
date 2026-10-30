@@ -11,7 +11,7 @@ import SlotsPanel from './SlotsPanel';
 import AccessPanel from './AccessPanel';
 import { Modal, Toast } from './ui';
 import { errMsg, rpc } from '@/lib/api';
-import { isFuture } from '@/lib/format';
+import { isFuture, mapsUrl, opSub, opTitle } from '@/lib/format';
 import type { BookingInput, OpData, Recap } from '@/lib/types';
 
 export type StaffCtx = {
@@ -91,6 +91,8 @@ export default function StaffPage({ token, opId, role }: { token: string; opId?:
   const nbLots = data.lots.length;
   const nbResa = data.reservations.length;
   const enAttente = data.lots.filter((l) => !l.reserve).length;
+  const nbVus = data.lots.filter((l) => l.visite === 'vu').length;
+  const nbAbs = data.lots.filter((l) => l.visite === 'absent').length;
   const libres = data.creneaux.filter((c) => isFuture(c)).reduce((s, c) => s + Math.max(0, c.capacite - c.pris), 0);
 
   const book = (b: BookingInput) =>
@@ -103,7 +105,7 @@ export default function StaffPage({ token, opId, role }: { token: string; opId?:
     <>
       <Header
         kicker={isAdmin ? 'Administration' : 'Espace gardien'}
-        title={op.immeuble}
+        title={opTitle(op)}
         right={
           <>
             {isAdmin && <Link className="btn ghost sm" href={`/admin/${token}`}>← Toutes les opérations</Link>}
@@ -115,7 +117,8 @@ export default function StaffPage({ token, opId, role }: { token: string; opId?:
         <div className="wrap">
           <div className="flex" style={{ marginBottom: 14 }}>
             <span className="badge">{op.objet}</span>
-            {op.adresse && <span className="muted small">{op.adresse}</span>}
+            {opSub(op) && <span className="muted small">{opSub(op)}</span>}
+            {op.adresse && <a className="maplink" href={mapsUrl(op.adresse)} target="_blank" rel="noreferrer">Voir sur Google Maps ↗</a>}
             {op.archived && <span className="badge grey">Archivée</span>}
           </div>
 
@@ -124,9 +127,9 @@ export default function StaffPage({ token, opId, role }: { token: string; opId?:
             <div className="stat"><div className="v">{enAttente}</div><div className="l">logement{enAttente > 1 ? 's' : ''} en attente{nbLots === 0 ? ' (liste vide)' : ''}</div></div>
             <div className="stat"><div className="v">{libres}</div><div className="l">place{libres > 1 ? 's' : ''} libre{libres > 1 ? 's' : ''} à venir</div></div>
             <div className="stat">
-              <div className="v">{nbLots ? Math.round((100 * data.lots.filter((l) => l.reserve).length) / nbLots) : 0}%</div>
-              <div className="l">des lots connus inscrits</div>
-              <div className="progress" style={{ marginTop: 6 }}><div style={{ width: `${nbLots ? (100 * data.lots.filter((l) => l.reserve).length) / nbLots : 0}%` }} /></div>
+              <div className="v">{nbVus}{nbLots > 0 && <span className="small muted" style={{ fontWeight: 600 }}> / {nbLots}</span>}</div>
+              <div className="l">logement{nbVus > 1 ? 's' : ''} visité{nbVus > 1 ? 's' : ''}{nbAbs > 0 ? ` · ${nbAbs} absent${nbAbs > 1 ? 's' : ''}` : ''}</div>
+              <div className="progress" style={{ marginTop: 6 }}><div style={{ width: `${nbLots ? (100 * nbVus) / nbLots : 0}%`, background: 'var(--ok)' }} /></div>
             </div>
           </div>
 

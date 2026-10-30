@@ -3,15 +3,21 @@
 import { useState } from 'react';
 import type { StaffCtx } from './StaffPage';
 import { Modal } from './ui';
+import BatimentGen, { defaultSpec, genTotal, type GenSpec } from './BatimentGen';
 import { rpc } from '@/lib/api';
 import { ETAGES_POSSIBLES, etageLabel, groupBy, heure, jourCourt, parseNumeros, sortLots } from '@/lib/format';
-import type { Lot } from '@/lib/types';
+import type { Lot, Visite } from '@/lib/types';
 
 export default function LotsPanel({ ctx }: { ctx: StaffCtx }) {
   const { data, token, opId, act, openBooking, notify } = ctx;
   const multiBat = data.batiments.length > 1;
   const [fBat, setFBat] = useState('');
-  const [fStat, setFStat] = useState<'tous' | 'attente' | 'inscrits'>('tous');
+  const [fStat, setFStat] = useState<'tous' | 'attente' | 'inscrits' | 'avoir' | 'vus'>('tous');
+  const seulDefautVide = data.batiments.length === 1 && data.batiments[0].nom === 'Bâtiment unique' && data.lots.length === 0;
+  const [gTarget, setGTarget] = useState<string>(''); // '' = nouveau bâtiment, sinon id à compléter
+  const [gSpec, setGSpec] = useState<GenSpec>(defaultSpec(seulDefautVide ? '' : `Bâtiment ${'ABCDEFGHIJ'[data.batiments.length] ?? data.batiments.length + 1}`));
+  const [eVisite, setEVisite] = useState<string>('');
+  const [eNote, setENote] = useState('');
 
   const [aBat, setABat] = useState(data.batiments[0]?.id ?? '');
   const [aDe, setADe] = useState('0');
@@ -29,6 +35,8 @@ export default function LotsPanel({ ctx }: { ctx: StaffCtx }) {
   if (fBat) lots = lots.filter((l) => l.batiment_id === fBat);
   if (fStat === 'attente') lots = lots.filter((l) => !l.reserve);
   if (fStat === 'inscrits') lots = lots.filter((l) => l.reserve);
+  if (fStat === 'avoir') lots = lots.filter((l) => l.visite !== 'vu');
+  if (fStat === 'vus') lots = lots.filter((l) => l.visite === 'vu');
 
   const parBat = groupBy(lots, (l) => l.batiment_id);
   const nums = parseNumeros(aNums);
@@ -55,15 +63,55 @@ export default function LotsPanel({ ctx }: { ctx: StaffCtx }) {
     setEBat(l.batiment_id);
     setEEtage(String(l.etage));
     setENum(l.numero);
+    setEVisite(l.visite ?? '');
+    setENote(l.visite_note ?? '');
+  }
+
+  async function generer() {
+    const nom = gSpec.nom.trim() || (seulDefautVide ? 'Bâtiment unique' : '');
+    if (!gTarget && !nom) { alert('Merci de donner un nom au bâtiment.'); return; }
+    let r: { crees: number } = { crees: 0 };
+    const ok = await act(async () => {
+      r = await rpc<{ crees: number }>('staff_generate_lots', {
+        p_token: token, p_op: opId, p_batiment: gTarget || null, p_nom: gTarget ? null : nom,
+        p_etage_min: gSpec.min, p_etage_max: gSpec.max, p_par_etage: gSpec.par, p_numerotation: gSpec.num,
+      });
+    });
+    if (ok) {
+      const total = genTotal(gSpec);
+      notify(r.crees === total ? `${r.crees} logements créés` : `${r.crees} créés, ${total - r.crees} existaient déjà`);
+      setGTarget('');
+      setGSpec(defaultSpec(`Bâtiment ${'ABCDEFGHIJ'[data.batiments.length + (gTarget ? 0 : 1)] ?? ''}`.trim()));
+    }
   }
 
   return (
     <>
       <div className="card no-print">
-        <h2>Ajouter des logements</h2>
+        <h2>{seulDefautVide ? 'Décrire l’immeuble' : 'Ajouter un bâtiment'}</h2>
         <p className="hint">
-          La liste sert à suivre qui est inscrit et qui reste à relancer. Elle peut rester vide : les occupants peuvent aussi saisir leur logement eux-mêmes.
+          Indiquez les étages et le nombre de logements par étage : la liste est générée automatiquement.
+          Elle sert à suivre qui est inscrit, qui reste à relancer et ce que le technicien a vu. Elle peut aussi rester vide : les occupants saisissent alors leur logement eux-mêmes.
         </p>
+        {data.batiments.some((b) => data.lots.some((l) => l.batiment_id === b.id)) && (
+          <div className="field">
+            <div className="seg">
+              <button type="button" className={gTarget === '' ? 'on' : ''} onClick={() => setGTarget('')}>Nouveau bâtiment</button>
+              {data.batiments.map((b) => (
+                <button type="button" key={b.id} className={gTarget === b.id ? 'on' : ''} onClick={() => setGTarget(b.id)}>Compléter {b.nom}</button>
+              ))}
+            </div>
+          </div>
+        )}
+        <BatimentGen spec={gSpec} onChange={setGSpec} showNom={!gTarget} nomFacultatif={seulDefautVide} />
+        <button className="btn" disabled={genTotal(gSpec) === 0} onClick={generer}>
+          Générer {genTotal(gSpec)} logement{genTotal(gSpec) > 1 ? 's' : ''}
+        </button>
+      </div>
+
+      <details className="card no-print">
+        <summary style={{ cursor: 'pointer', fontWeight: 700, color: 'var(--navy)' }}>Ajouter des logements un par un</summary>
+        <p className="hint" style={{ marginTop: 10 }}>Pour les cas particuliers : loge, local commercial, numéros irréguliers…</p>
         <div className={multiBat ? 'row4' : 'row3'}>
           {multiBat && (
             <div className="field">
@@ -98,7 +146,7 @@ export default function LotsPanel({ ctx }: { ctx: StaffCtx }) {
             <span className="muted small">Les numéros {nums.slice(0, 6).join(', ')}{nums.length > 6 ? '…' : ''} seront créés à chacun des {etages.length} étages.</span>
           )}
         </div>
-      </div>
+      </details>
 
       <div className="card">
         <div className="flex" style={{ marginBottom: 14 }}>
@@ -113,6 +161,8 @@ export default function LotsPanel({ ctx }: { ctx: StaffCtx }) {
             <button className={fStat === 'tous' ? 'on' : ''} onClick={() => setFStat('tous')}>Tous</button>
             <button className={fStat === 'attente' ? 'on' : ''} onClick={() => setFStat('attente')}>En attente</button>
             <button className={fStat === 'inscrits' ? 'on' : ''} onClick={() => setFStat('inscrits')}>Inscrits</button>
+            <button className={fStat === 'avoir' ? 'on' : ''} onClick={() => setFStat('avoir')}>À visiter</button>
+            <button className={fStat === 'vus' ? 'on' : ''} onClick={() => setFStat('vus')}>Visités</button>
           </div>
         </div>
 
@@ -133,11 +183,14 @@ export default function LotsPanel({ ctx }: { ctx: StaffCtx }) {
                       const r = resaByLot.get(l.id);
                       const c = r ? cMap.get(r.creneau_id) : undefined;
                       return (
-                        <div key={l.id} className={`lotcell ${r ? 'done' : 'todo'}`}>
+                        <div key={l.id} className={`lotcell ${l.visite ? l.visite : r ? 'done' : 'todo'}`}>
                           <div className="flex" style={{ gap: 6 }}>
                             <span className="n grow">Lot {l.numero}</span>
+                            {l.visite === 'vu' && <span className="badge vu">Visité ✓</span>}
+                            {l.visite === 'absent' && <span className="badge absent">Absent</span>}
                             <button className="linkbtn small no-print" onClick={() => startEdit(l)} title="Modifier">Modifier</button>
                           </div>
+                          {l.visite_note && <div className="s" style={{ fontStyle: 'italic' }}>« {l.visite_note} »</div>}
                           {r && c ? (
                             <div className="s">{r.nom}<br />{jourCourt(c.jour)} · {heure(c.debut)}</div>
                           ) : (
@@ -181,9 +234,23 @@ export default function LotsPanel({ ctx }: { ctx: StaffCtx }) {
               <input type="text" value={eNum} onChange={(e) => setENum(e.target.value)} />
             </div>
           </div>
+          <div className="field">
+            <label>Visite du technicien</label>
+            <div className="seg">
+              <button type="button" className={eVisite === '' ? 'on' : ''} onClick={() => setEVisite('')}>À faire</button>
+              <button type="button" className={eVisite === 'vu' ? 'on' : ''} onClick={() => setEVisite('vu')}>Visité</button>
+              <button type="button" className={eVisite === 'absent' ? 'on' : ''} onClick={() => setEVisite('absent')}>Absent</button>
+            </div>
+          </div>
+          {eVisite !== '' && (
+            <div className="field"><label>Note de visite</label><input type="text" value={eNote} onChange={(e) => setENote(e.target.value)} /></div>
+          )}
           <div className="btns">
             <button className="btn"
               onClick={async () => {
+                if ((eVisite || null) !== (editing.visite ?? null) || (eNote || '') !== (editing.visite_note ?? '')) {
+                  if (!(await act(() => rpc('staff_set_visite', { p_token: token, p_op: opId, p_lot: editing.id, p_statut: (eVisite || null) as Visite, p_note: eNote })))) return;
+                }
                 if (await act(() => rpc('staff_update_lot', { p_token: token, p_op: opId, p_lot: editing.id, p_batiment: eBat, p_etage: parseInt(eEtage, 10), p_numero: eNum }), 'Logement modifié')) setEditing(null);
               }}>
               Enregistrer

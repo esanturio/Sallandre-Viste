@@ -4,8 +4,10 @@ import { useState } from 'react';
 import type { StaffCtx } from './StaffPage';
 import { Modal } from './ui';
 import { rpc } from '@/lib/api';
-import { ORIGINE_LABEL, STATUT_LABEL, etageLabel, groupBy, heure, isFuture, jourCourt, jourLong, lotLabel, parisToday, sortLots } from '@/lib/format';
+import { opTitle, ORIGINE_LABEL, STATUT_LABEL, etageLabel, groupBy, heure, isFuture, jourCourt, jourLong, lotLabel, parisToday, sortLots } from '@/lib/format';
 import type { Reservation } from '@/lib/types';
+
+const VISITE_LABEL: Record<string, string> = { vu: 'Visité', absent: 'Absent', '': 'À faire' };
 
 export default function PlanningPanel({ ctx }: { ctx: StaffCtx }) {
   const { data, token, opId, act, openBooking } = ctx;
@@ -30,7 +32,7 @@ export default function PlanningPanel({ ctx }: { ctx: StaffCtx }) {
     };
     const cMap = new Map(data.creneaux.map((c) => [c.id, c]));
     const bMap = new Map(data.batiments.map((b) => [b.id, b.nom]));
-    const head = ['Statut RDV', 'Date', 'Début', 'Fin', 'Bâtiment', 'Étage', 'Lot', 'Nom', 'Téléphone', 'E-mail', 'Occupant', 'Informations', 'Inscrit'];
+    const head = ['Statut RDV', 'Date', 'Début', 'Fin', 'Bâtiment', 'Étage', 'Lot', 'Nom', 'Téléphone', 'E-mail', 'Occupant', 'Informations', 'Inscrit', 'Visite', 'Note visite'];
     const rows: unknown[][] = [];
     const resaByLot = new Map(data.reservations.map((r) => [r.lot_id, r]));
     const sorted = [...data.reservations].sort((a, b) => {
@@ -41,17 +43,17 @@ export default function PlanningPanel({ ctx }: { ctx: StaffCtx }) {
       const c = cMap.get(r.creneau_id)!;
       const l = lotsById.get(r.lot_id);
       rows.push(['Planifié', c.jour.split('-').reverse().join('/'), c.debut, c.fin, l ? bMap.get(l.batiment_id) : '', l ? etageLabel(l.etage) : '', l?.numero ?? '',
-        r.nom, r.telephone, r.email ?? '', STATUT_LABEL[r.statut], r.commentaire ?? '', ORIGINE_LABEL[r.created_by]]);
+        r.nom, r.telephone, r.email ?? '', STATUT_LABEL[r.statut], r.commentaire ?? '', ORIGINE_LABEL[r.created_by], VISITE_LABEL[l?.visite ?? ''] ?? '', l?.visite_note ?? '']);
     }
     for (const l of sortLots(data.lots, data.batiments)) {
       if (resaByLot.has(l.id)) continue;
-      rows.push(['En attente', '', '', '', bMap.get(l.batiment_id), etageLabel(l.etage), l.numero, '', '', '', '', '', '']);
+      rows.push(['En attente', '', '', '', bMap.get(l.batiment_id), etageLabel(l.etage), l.numero, '', '', '', '', '', '', VISITE_LABEL[l.visite ?? ''] ?? '', l.visite_note ?? '']);
     }
     const csv = '﻿' + [head, ...rows].map((r) => r.map(esc).join(';')).join('\r\n');
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = `planning-${data.operation.immeuble.replace(/[^\w-]+/g, '_')}.csv`;
+    a.download = `planning-${opTitle(data.operation).replace(/[^\w-]+/g, '_')}.csv`;
     a.click();
     setTimeout(() => URL.revokeObjectURL(a.href), 1000);
   }
@@ -113,6 +115,8 @@ export default function PlanningPanel({ ctx }: { ctx: StaffCtx }) {
                             <span className="lot">{l ? lotLabel(l, data.batiments, multiBat) : 'Logement ?'}</span>
                             <span className="who">{r.nom}</span>
                             <span className="badge grey">{STATUT_LABEL[r.statut]}</span>
+                            {l?.visite === 'vu' && <span className="badge vu">Visité ✓</span>}
+                            {l?.visite === 'absent' && <span className="badge absent">Absent</span>}
                           </div>
                           <div className="meta">
                             <a href={`tel:${r.telephone.replace(/\s/g, '')}`}>{r.telephone}</a>
@@ -120,6 +124,7 @@ export default function PlanningPanel({ ctx }: { ctx: StaffCtx }) {
                             <span>Inscrit {ORIGINE_LABEL[r.created_by]}</span>
                           </div>
                           {r.commentaire && <div className="comm">« {r.commentaire} »</div>}
+                          {l?.visite_note && <div className="comm">Technicien : « {l.visite_note} »</div>}
                           <div className="acts btns no-print">
                             <button className="btn ghost sm" onClick={() => { setMoving(r); setCible(r.creneau_id); }}>Déplacer</button>
                             <button className="btn danger sm"

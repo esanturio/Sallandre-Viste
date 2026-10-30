@@ -210,3 +210,36 @@ table.list tr:last-child td { border-bottom: none; }
   body { background: #fff; }
   .card { box-shadow: none; break-inside: avoid; }
 }
+
+/* ===== Adresse ===== */
+.addr-wrap { position: relative; }
+.addr-list { position: absolute; z-index: 30; left: 0; right: 0; top: calc(100% + 4px); margin: 0; padding: 4px; list-style: none; background: #fff; border: 1px solid var(--line); border-radius: 10px; box-shadow: 0 10px 30px rgba(19,69,117,.15); max-height: 280px; overflow-y: auto; }
+.addr-list li { padding: 10px 12px; border-radius: 8px; cursor: pointer; font-size: 14px; }
+.addr-list li:hover, .addr-list li.on { background: var(--sky-light); color: var(--navy); }
+.maplink { font-size: 13px; white-space: nowrap; }
+.hero .maplink { color: #fff; opacity: .85; }
+
+/* ===== Générateur de bâtiment ===== */
+.genrow { border: 1px dashed var(--sky); border-radius: 10px; padding: 14px; margin-bottom: 10px; background: var(--sky-lighter); }
+.preview { font-size: 13px; color: var(--muted); }
+.preview b { color: var(--navy); }
+
+/* ===== Visites ===== */
+.badge.vu { background: var(--ok-bg); color: var(--ok); }
+.badge.absent { background: var(--err-bg); color: var(--err); }
+.lotcell.vu { background: var(--ok-bg); border-color: #8fd0aa; }
+.lotcell.absent { background: var(--err-bg); border-color: #f1c4bf; }
+.vbtns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+.vbtn { border: 2px solid var(--line); background: #fff; border-radius: 10px; padding: 12px 8px; font-weight: 700; cursor: pointer; font-size: 15px; }
+.vbtn.vu.on { background: var(--ok); border-color: var(--ok); color: #fff; }
+.vbtn.absent.on { background: var(--err); border-color: var(--err); color: #fff; }
+.vbtn.vu:not(.on) { color: var(--ok); }
+.vbtn.absent:not(.on) { color: var(--err); }
+.techcard { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 14px; margin-bottom: 10px; }
+.techcard.vu { border-left: 5px solid var(--ok); }
+.techcard.absent { border-left: 5px solid var(--err); }
+.techcard .h { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
+.techcard .t { font-weight: 800; color: var(--navy); font-size: 16px; }
+.techcard .lot { font-weight: 700; }
+.techcard .tel { display: inline-block; margin-top: 4px; font-weight: 600; }
+.techcard textarea { min-height: 54px; margin-top: 8px; font-size: 15px; }

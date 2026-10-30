@@ -1,17 +1,29 @@
 export type Operation = {
   id: string;
-  immeuble: string;
+  immeuble: string | null;
   adresse: string | null;
   objet: string;
   consignes: string | null;
   archived: boolean;
   concierge_token?: string;
   tenant_token?: string;
+  tech_token?: string;
 };
 
 export type Batiment = { id: string; nom: string; ordre: number };
 
-export type Lot = { id: string; batiment_id: string; etage: number; numero: string; reserve: boolean };
+export type Visite = 'vu' | 'absent' | null;
+
+export type Lot = {
+  id: string;
+  batiment_id: string;
+  etage: number;
+  numero: string;
+  reserve: boolean;
+  visite?: Visite;
+  visite_note?: string | null;
+  visite_at?: string | null;
+};
 
 export type Creneau = { id: string; jour: string; debut: string; fin: string; capacite: number; pris: number };
 
@@ -36,17 +48,18 @@ export type OpData = {
   lots: Lot[];
   creneaux: Creneau[];
   reservations: Reservation[];
-  role?: 'admin' | 'concierge';
+  role?: 'admin' | 'concierge' | 'tech';
 };
 
 export type OpSummary = {
   id: string;
-  immeuble: string;
+  immeuble: string | null;
   adresse: string | null;
   objet: string;
   archived: boolean;
   created_at: string;
   nb_lots: number;
+  nb_vus: number;
   nb_reservations: number;
   nb_creneaux: number;
   premier_jour: string | null;
@@ -76,3 +89,5 @@ export type BookingInput = {
   statut: Statut;
   comm: string;
 };
+
+export type Numerotation = 'etage' | 'continue' | 'lettre';

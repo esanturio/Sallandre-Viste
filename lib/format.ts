@@ -1,4 +1,4 @@
-import type { Batiment, Creneau, Lot } from './types';
+import type { Batiment, Creneau, Lot, Numerotation } from './types';
 
 export function etageLabel(e: number): string {
   if (e === 0) return 'RDC';
@@ -100,3 +100,28 @@ export function parseNumeros(input: string): string[] {
   }
   return Array.from(new Set(out));
 }
+
+/** Titre affiché d'une opération : nom de résidence s'il existe, sinon l'adresse */
+export function opTitle(o: { immeuble: string | null; adresse: string | null }): string {
+  return o.immeuble || o.adresse || 'Immeuble';
+}
+/** Sous-titre : l'adresse, seulement si un nom de résidence est affiché en titre */
+export function opSub(o: { immeuble: string | null; adresse: string | null }): string | null {
+  return o.immeuble ? o.adresse : null;
+}
+export function mapsUrl(adresse: string): string {
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(adresse)}`;
+}
+
+/** Même logique que la base (staff_generate_lots), pour l'aperçu */
+export function numeroGenere(mode: Numerotation, etage: number, i: number, k: number): string {
+  if (mode === 'continue') return String(k);
+  if (mode === 'etage') return etage > 0 ? String(etage * 100 + i) : etage === 0 ? String(i).padStart(2, '0') : `SS${-etage}-${i}`;
+  return i <= 26 ? String.fromCharCode(64 + i) : String(i);
+}
+
+export const NUMEROTATIONS: { v: Numerotation; label: string }[] = [
+  { v: 'etage', label: 'Par étage (01, 02… 101, 102… 201…)' },
+  { v: 'continue', label: 'Continue (1, 2, 3, 4…)' },
+  { v: 'lettre', label: 'Lettres à chaque étage (A, B, C…)' },
+];
