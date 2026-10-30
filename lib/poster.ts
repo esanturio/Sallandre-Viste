@@ -30,12 +30,12 @@ export function ouvrirAffiche(opts: {
 @page{size:A4;margin:14mm}
 *{box-sizing:border-box}
 body{font-family:Montserrat,Arial,sans-serif;color:#1d2733;text-align:center;margin:0;padding:16px}
-.logo{width:200px;margin:4px auto 22px;display:block}
-.objet{display:inline-block;background:#134575;color:#fff;font-weight:700;font-size:15px;letter-spacing:.06em;text-transform:uppercase;padding:6px 16px;border-radius:999px;margin-bottom:12px}
-h1{color:#134575;font-size:30px;margin:0 0 4px}
-h2{font-weight:500;font-size:18px;margin:0 0 24px;color:#5d6875}
+.logo{width:170px;margin:0 auto 16px;display:block}
+.objet{display:block;background:#134575;color:#fff;font-weight:800;font-size:40px;line-height:1.15;letter-spacing:.02em;text-transform:uppercase;padding:18px 22px;border-radius:16px;margin:0 auto 18px;max-width:640px}
+h1{color:#134575;font-size:24px;margin:0 0 4px}
+h2{font-weight:500;font-size:17px;margin:0 0 20px;color:#5d6875}
 .box{border:3px solid #134575;border-radius:18px;padding:24px;margin:0 auto;max-width:520px}
-.qr{width:290px;height:290px}
+.qr{width:270px;height:270px}
 p{font-size:18px;line-height:1.45;margin:0 0 12px}
 .url{font-size:12px;color:#5d6875;word-break:break-all;margin-top:8px}
 .c{white-space:pre-wrap;font-size:15px;color:#5d6875;margin:20px auto 0;max-width:520px}
