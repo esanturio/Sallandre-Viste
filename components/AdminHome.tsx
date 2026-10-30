@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 import Header, { Footer } from './Header';
 import AddressInput from './AddressInput';
-import BatimentGen, { defaultSpec, genTotal, type GenSpec } from './BatimentGen';
+import BatimentGen, { defaultSpec, genTotal, runGen, type GenSpec } from './BatimentGen';
 import { errMsg, rpc } from '@/lib/api';
 import { jourCourt, opSub, opTitle } from '@/lib/format';
 import type { OpSummary } from '@/lib/types';
@@ -45,10 +45,7 @@ export default function AdminHome({ token }: { token: string }) {
       });
       if (structure === 'maintenant') {
         for (const b of bats) {
-          await rpc('staff_generate_lots', {
-            p_token: token, p_op: id, p_batiment: null, p_nom: b.nom.trim() || 'Bâtiment unique',
-            p_etage_min: b.min, p_etage_max: b.max, p_par_etage: b.par, p_numerotation: b.num,
-          });
+          if (genTotal(b) > 0) await runGen(token, id, null, b.nom.trim() || 'Bâtiment unique', b);
         }
       }
       router.push(`/admin/${token}/${id}`);

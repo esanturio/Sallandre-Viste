@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import type { StaffCtx } from './StaffPage';
 import { Modal } from './ui';
-import BatimentGen, { defaultSpec, genTotal, type GenSpec } from './BatimentGen';
+import BatimentGen, { defaultSpec, genTotal, runGen, type GenSpec } from './BatimentGen';
 import { rpc } from '@/lib/api';
 import { ETAGES_POSSIBLES, etageLabel, groupBy, heure, jourCourt, parseNumeros, sortLots } from '@/lib/format';
 import type { Lot, Visite } from '@/lib/types';
@@ -72,10 +72,7 @@ export default function LotsPanel({ ctx }: { ctx: StaffCtx }) {
     if (!gTarget && !nom) { alert('Merci de donner un nom au bâtiment.'); return; }
     let r: { crees: number } = { crees: 0 };
     const ok = await act(async () => {
-      r = await rpc<{ crees: number }>('staff_generate_lots', {
-        p_token: token, p_op: opId, p_batiment: gTarget || null, p_nom: gTarget ? null : nom,
-        p_etage_min: gSpec.min, p_etage_max: gSpec.max, p_par_etage: gSpec.par, p_numerotation: gSpec.num,
-      });
+      r = await runGen(token, opId, gTarget || null, nom, gSpec);
     });
     if (ok) {
       const total = genTotal(gSpec);
