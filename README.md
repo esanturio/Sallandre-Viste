@@ -46,7 +46,7 @@ npm run dev
 
 Projet Vercel séparé (dossier racine `coupures`). L'administrateur ouvre `/a/<jeton admin>` :
 adresse (suggestions IGN), résidence, bâtiment, bailleur (mêmes logos que l'outil de rendez-vous), dates et horaires,
-eau froide / chaude, option « sans utilisation », contact. Deux sorties :
+eau froide / chaude, avertissement « ne pas tirer la chasse » (en rouge), contact. Deux sorties :
 - **Imprimer / PDF** : feuille A4 fidèle au modèle Sallandre ;
 - **Envoyer au gardien** : lien `/avis#…` (e-mail, SMS, WhatsApp, partage) qui ouvre l'avis prêt à imprimer.
 Le contenu de l'avis est entièrement dans le lien (rien n'est enregistré en base) ; seul le logo du bailleur est lu via `public_bailleur_logo`.

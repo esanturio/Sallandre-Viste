@@ -152,18 +152,9 @@ export default function Editeur({ token }: { token: string }) {
                 <label htmlFor="motif">Afin de procéder à des…</label>
                 <input id="motif" type="text" value={a.motif} maxLength={200} onChange={(e) => set('motif', e.target.value)} />
               </div>
-              <label className="check">
-                <input type="checkbox" checked={a.sansUtilisation} onChange={(e) => set('sansUtilisation', e.target.checked)} />
-                <span><b>Sans utilisation</b> : interdire l’usage des wc, douches, éviers… (travaux sur l’évacuation)</span>
-              </label>
-              {a.sansUtilisation && (
-                <div className="field">
-                  <textarea value={a.texteSansUtilisation} maxLength={1000} rows={4} onChange={(e) => set('texteSansUtilisation', e.target.value)} />
-                </div>
-              )}
               <label className="check rouge">
                 <input type="checkbox" checked={a.chasse} onChange={(e) => set('chasse', e.target.checked)} />
-                <span><b>Ne pas tirer la chasse</b> : avertissement en rouge (techniciens sur les évacuations)</span>
+                <span><b>Ne pas tirer la chasse</b> : avertissement en rouge (travaux sur les évacuations)</span>
               </label>
               {a.chasse && (
                 <div className="field">

@@ -41,8 +41,6 @@ export default function AvisFeuille({ a, logo }: { a: Avis; logo?: Logo | null }
 
       <p>Les robinets ne doivent pas être manœuvrés durant la coupure et vous devez veiller à les laisser fermés en quittant votre logement.</p>
 
-      {a.sansUtilisation && a.texteSansUtilisation.trim() && <p className="sh-fort">{a.texteSansUtilisation}</p>}
-
       {a.chasse && a.texteChasse.trim() && <p className="sh-rouge">⚠ {a.texteChasse}</p>}
 
       <p className="sh-gap">
