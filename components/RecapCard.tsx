@@ -1,7 +1,7 @@
 import { etageLabel, heure, jourLong } from '@/lib/format';
 import type { Recap } from '@/lib/types';
 
-export default function RecapCard({ r, showBat, immeuble, adresse, staff }: { r: Recap; showBat: boolean; immeuble?: string; adresse?: string | null; staff?: boolean }) {
+export default function RecapCard({ r, showBat, immeuble, adresse, staff, contact }: { r: Recap; showBat: boolean; immeuble?: string; adresse?: string | null; staff?: boolean; contact?: string }) {
   return (
     <div className="card recap">
       <div className="check">✓</div>
@@ -18,7 +18,7 @@ export default function RecapCard({ r, showBat, immeuble, adresse, staff }: { r:
       {!staff && (
         <p className="muted small" style={{ marginTop: 18 }}>
           Pensez à noter ce créneau ou à faire une capture d’écran.<br />
-          Pour le modifier ou l’annuler, contactez votre gardien.
+          {contact}
         </p>
       )}
     </div>

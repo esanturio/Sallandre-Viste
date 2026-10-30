@@ -11,7 +11,7 @@ const sb = createClient(SUPABASE_URL, SUPABASE_KEY, {
 
 const MESSAGES: Record<string, string> = {
   ACCES_REFUSE: "Ce lien d'accès n'est pas valide ou a été renouvelé.",
-  LIEN_INVALIDE: "Ce lien n'est plus valide. Rapprochez-vous de votre gardien ou du gestionnaire.",
+  LIEN_INVALIDE: "Ce lien n'est plus valide. Rapprochez-vous du gestionnaire de l'immeuble.",
   NOM_REQUIS: 'Merci d’indiquer votre nom.',
   TELEPHONE_INVALIDE: 'Merci d’indiquer un numéro de téléphone valide.',
   STATUT_INVALIDE: 'Statut invalide.',
@@ -21,7 +21,7 @@ const MESSAGES: Record<string, string> = {
   CRENEAU_COMPLET: 'Ce créneau vient d’être pris par quelqu’un d’autre. Merci d’en choisir un autre.',
   LOT_INTROUVABLE: 'Ce logement est introuvable.',
   LOT_REQUIS: 'Merci de préciser votre logement (étage et numéro).',
-  LOT_DEJA_RESERVE: 'Ce logement a déjà un rendez-vous. Pour le modifier, contactez le gardien.',
+  LOT_DEJA_RESERVE: 'Ce logement a déjà un rendez-vous. Pour le modifier, utilisez le contact indiqué en haut de la page.',
   LOTS_AVEC_RDV: 'Impossible de retirer autant de logements : certains ont un rendez-vous ou ont déjà été visités.',
   NOM_REQUIS_BAT: 'Merci de donner un nom au bâtiment.',
   LOT_EXISTE_DEJA: 'Ce logement existe déjà à cet étage.',

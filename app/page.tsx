@@ -6,7 +6,7 @@ export default function Home() {
       <div className="card" style={{ marginTop: 32 }}>
         <h2>Prise de rendez-vous</h2>
         <p className="muted" style={{ margin: 0 }}>
-          Pour réserver votre créneau de visite, utilisez le lien ou le QR code communiqué par votre gardien ou affiché dans votre immeuble.
+          Pour réserver votre créneau de visite, utilisez le lien ou le QR code qui vous a été communiqué ou affiché dans votre immeuble.
         </p>
       </div>
     </div>

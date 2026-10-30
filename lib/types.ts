@@ -4,6 +4,7 @@ export type Operation = {
   adresse: string | null;
   objet: string;
   consignes: string | null;
+  contact?: string | null;
   archived: boolean;
   concierge_token?: string;
   tenant_token?: string;

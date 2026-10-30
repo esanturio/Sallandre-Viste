@@ -109,6 +109,10 @@ export function opTitle(o: { immeuble: string | null; adresse: string | null }):
 export function opSub(o: { immeuble: string | null; adresse: string | null }): string | null {
   return o.immeuble ? o.adresse : null;
 }
+/** Phrase « qui contacter » pour les occupants (il n'y a pas toujours de gardien) */
+export function contactPhrase(o: { contact?: string | null }): string {
+  return o.contact?.trim() ? `Pour toute question ou pour modifier votre rendez-vous : ${o.contact.trim()}` : 'Pour modifier votre rendez-vous, contactez le gestionnaire de l’immeuble.';
+}
 export function mapsUrl(adresse: string): string {
   return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(adresse)}`;
 }

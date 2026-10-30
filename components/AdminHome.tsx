@@ -16,7 +16,7 @@ export default function AdminHome({ token }: { token: string }) {
   const [err, setErr] = useState('');
   const [showArch, setShowArch] = useState(false);
   const [creating, setCreating] = useState(false);
-  const [f, setF] = useState({ adresse: '', immeuble: '', objet: 'Visite technique', consignes: '' });
+  const [f, setF] = useState({ adresse: '', immeuble: '', objet: 'Visite technique', consignes: '', contact: '' });
   const [structure, setStructure] = useState<'plus_tard' | 'maintenant'>('maintenant');
   const [bats, setBats] = useState<GenSpec[]>([defaultSpec()]);
   const [busy, setBusy] = useState(false);
@@ -43,6 +43,9 @@ export default function AdminHome({ token }: { token: string }) {
       const id = await rpc<string>('admin_save_operation', {
         p_token: token, p_op: null, p_immeuble: f.immeuble, p_adresse: f.adresse, p_objet: f.objet, p_consignes: f.consignes, p_archived: false, p_batiments: null,
       });
+      if (f.contact.trim()) {
+        try { await rpc('admin_set_contact', { p_token: token, p_op: id, p_contact: f.contact }); } catch { /* modifiable ensuite */ }
+      }
       if (structure === 'maintenant') {
         try {
           for (const b of bats) {
@@ -95,6 +98,11 @@ export default function AdminHome({ token }: { token: string }) {
                   <label htmlFor="objet">Objet de la visite</label>
                   <input id="objet" type="text" value={f.objet} onChange={(e) => setF({ ...f, objet: e.target.value })} placeholder="ex. Audit plomberie, relevé compteurs…" />
                 </div>
+              </div>
+              <div className="field">
+                <label htmlFor="contact">Contact pour les occupants <span className="opt">(facultatif)</span></label>
+                <input id="contact" type="text" value={f.contact} onChange={(e) => setF({ ...f, contact: e.target.value })} maxLength={200}
+                  placeholder="ex. Gardien : M. Martin – 06 12 34 56 78  ou  Sallandre : 01 23 45 67 89" />
               </div>
               <div className="field">
                 <label htmlFor="consignes">Consignes pour les occupants <span className="opt">(facultatif)</span></label>

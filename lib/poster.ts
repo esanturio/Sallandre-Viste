@@ -57,7 +57,7 @@ ${sous ? `<h2>${esc(sous)}</h2>` : '<div style="height:20px"></div>'}
 <p>Scannez ce QR code avec l’appareil photo<br>de votre téléphone et choisissez votre créneau.</p>
 <img class="qr" src="${qr}" alt="QR code">
 <div class="url">${esc(url)}</div>
-<p style="font-size:15px;margin:14px 0 0">Aucun compte à créer.<br>En cas de difficulté, adressez-vous à votre gardien.</p>
+<p style="font-size:15px;margin:14px 0 0">Aucun compte à créer.${op.contact ? '<br>Une question ? ' + esc(op.contact) : ''}</p>
 </div>
 ${op.consignes ? `<div class="c">${esc(op.consignes)}</div>` : ''}
 ${coupuresHtml}

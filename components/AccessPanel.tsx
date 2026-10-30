@@ -13,7 +13,7 @@ export default function AccessPanel({ ctx }: { ctx: StaffCtx }) {
   const op = data.operation;
   const router = useRouter();
   const [origin, setOrigin] = useState('');
-  const [f, setF] = useState({ immeuble: op.immeuble ?? '', adresse: op.adresse ?? '', objet: op.objet, consignes: op.consignes ?? '' });
+  const [f, setF] = useState({ immeuble: op.immeuble ?? '', adresse: op.adresse ?? '', objet: op.objet, consignes: op.consignes ?? '', contact: op.contact ?? '' });
 
   useEffect(() => setOrigin(window.location.origin), []);
   const conciergeUrl = origin ? `${origin}/c/${op.concierge_token}` : '';
@@ -31,7 +31,7 @@ export default function AccessPanel({ ctx }: { ctx: StaffCtx }) {
 
       <div className="card">
         <h2>Lien pour le gardien</h2>
-        <p className="hint">Le gardien voit le planning, les coordonnées, les logements en attente, et peut inscrire ou déplacer des occupants. Il ne peut pas modifier les créneaux.</p>
+        <p className="hint">Le gardien voit le planning, les coordonnées, les logements en attente, et peut inscrire ou déplacer des occupants et imprimer l’affiche. Il ne peut pas modifier les créneaux.<br /><b>Pas de gardien ?</b> N’envoyez ce lien à personne : vous avez toutes ces fonctions ici.</p>
         <LinkBox url={conciergeUrl} />
         <div className="spacer" />
         <button className="linkbtn small" onClick={() => regen('concierge')}>Créer un nouveau lien (désactive l’ancien)</button>
@@ -53,12 +53,20 @@ export default function AccessPanel({ ctx }: { ctx: StaffCtx }) {
         </div>
         <div className="field"><label>Adresse de l’immeuble</label><AddressInput value={f.adresse} onChange={(v) => setF({ ...f, adresse: v })} /></div>
         <div className="field">
+          <label>Contact pour les occupants <span className="opt">(facultatif — affiché sur la page, la confirmation et l’affiche)</span></label>
+          <input type="text" value={f.contact} onChange={(e) => setF({ ...f, contact: e.target.value })} maxLength={200}
+            placeholder="ex. Gardien : M. Martin – 06 12 34 56 78  ou  Sallandre : 01 23 45 67 89" />
+        </div>
+        <div className="field">
           <label>Consignes pour les occupants <span className="opt">(affichées sur la page de réservation)</span></label>
           <textarea value={f.consignes} onChange={(e) => setF({ ...f, consignes: e.target.value })} placeholder="ex. Merci de dégager l’accès sous l’évier et à la salle de bains." />
         </div>
-        <button className="btn" onClick={() => act(() => rpc('admin_save_operation', {
-          p_token: token, p_op: opId, p_immeuble: f.immeuble, p_adresse: f.adresse, p_objet: f.objet, p_consignes: f.consignes, p_archived: op.archived, p_batiments: null,
-        }), 'Enregistré')}>Enregistrer</button>
+        <button className="btn" onClick={() => act(async () => {
+          await rpc('admin_save_operation', {
+            p_token: token, p_op: opId, p_immeuble: f.immeuble, p_adresse: f.adresse, p_objet: f.objet, p_consignes: f.consignes, p_archived: op.archived, p_batiments: null,
+          });
+          await rpc('admin_set_contact', { p_token: token, p_op: opId, p_contact: f.contact });
+        }, 'Enregistré')}>Enregistrer</button>
       </div>
 
       <div className="card">
