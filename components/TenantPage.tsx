@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import Header, { Footer } from './Header';
 import BookingForm from './BookingForm';
 import RecapCard from './RecapCard';
+import CoupuresBanner, { coupuresPour } from './Coupures';
 import { errMsg, rpc } from '@/lib/api';
 import { mapsUrl, opSub, opTitle } from '@/lib/format';
 import type { BookingInput, OpData, Recap } from '@/lib/types';
@@ -64,13 +65,17 @@ export default function TenantPage({ token }: { token: string }) {
       <main>
         <div className="wrap narrow">
           {recap ? (
-            <RecapCard r={recap} showBat={data.batiments.length > 1} immeuble={opTitle(op)} adresse={opSub(op)} />
+            <>
+              <RecapCard r={recap} showBat={data.batiments.length > 1} immeuble={opTitle(op)} adresse={opSub(op)} />
+              <CoupuresBanner coupures={coupuresPour(data.coupures, recap.batiment_id)} batiments={data.batiments} titre="À noter : coupures d’eau prévues pour votre bâtiment" />
+            </>
           ) : (
             <>
               <div className="notice info">
                 Choisissez le créneau qui vous convient pour la visite de votre logement. Aucun compte à créer : il suffit de remplir ce formulaire.
               </div>
               {op.consignes && <div className="notice warn consignes">{op.consignes}</div>}
+              <CoupuresBanner coupures={data.coupures ?? []} batiments={data.batiments} />
               <BookingForm data={data} onSubmit={book} onBooked={(r) => { setRecap(r); window.scrollTo({ top: 0, behavior: 'smooth' }); }} onConflict={load} />
             </>
           )}

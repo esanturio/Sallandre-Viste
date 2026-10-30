@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import Header, { Footer } from './Header';
 import { Toast } from './ui';
+import CoupuresBanner from './Coupures';
 import { errMsg, rpc } from '@/lib/api';
 import { STATUT_LABEL, etageLabel, groupBy, heure, jourCourt, jourLong, lotLabel, mapsUrl, opSub, opTitle, parisToday, sortLots } from '@/lib/format';
 import type { Batiment, Creneau, Lot, OpData, Reservation, Visite } from '@/lib/types';
@@ -144,6 +145,7 @@ export default function TechPage({ token }: { token: string }) {
               </div>
             )}
             {op.consignes && <div className="notice warn consignes" style={{ marginTop: 12, marginBottom: 0 }}>{op.consignes}</div>}
+            {(data.coupures ?? []).length > 0 && <div style={{ marginTop: 12 }}><CoupuresBanner coupures={data.coupures!} batiments={data.batiments} compact /></div>}
           </div>
 
           <div className="seg" style={{ marginBottom: 14 }}>

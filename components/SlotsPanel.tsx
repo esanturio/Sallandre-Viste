@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import type { StaffCtx } from './StaffPage';
 import { rpc } from '@/lib/api';
+import CoupuresPanel from './CoupuresPanel';
 import { groupBy, heure, jourCourt, jourLong, parisToday } from '@/lib/format';
 
 const DUREES = [15, 20, 30, 45, 60, 90, 120];
@@ -60,8 +61,11 @@ export default function SlotsPanel({ ctx }: { ctx: StaffCtx }) {
     ids.length && confirm(`Supprimer ${ids.length} créneau${ids.length > 1 ? 'x' : ''} ?`) &&
     act(() => rpc('admin_delete_creneaux', { p_token: token, p_op: opId, p_ids: ids }), 'Créneaux supprimés').then(() => setSel(new Set()));
 
+  const batNom = (id?: string | null) => (id ? data.batiments.find((b) => b.id === id)?.nom ?? '' : '');
+
   return (
     <>
+      <CoupuresPanel ctx={ctx} />
       <div className="card">
         <h2>Ouvrir des créneaux</h2>
         <p className="hint">Choisissez les jours, puis la plage horaire et la durée de chaque visite. Les créneaux seront découpés automatiquement.</p>
@@ -151,7 +155,10 @@ export default function SlotsPanel({ ctx }: { ctx: StaffCtx }) {
                       <td style={{ width: 30 }}>
                         <input type="checkbox" disabled={c.pris > 0} checked={sel.has(c.id)} onChange={() => toggle(c.id)} aria-label="Sélectionner" />
                       </td>
-                      <td style={{ fontWeight: 600 }}>{heure(c.debut)} – {heure(c.fin)}</td>
+                      <td style={{ fontWeight: 600 }}>
+                        {heure(c.debut)} – {heure(c.fin)}
+                        {c.batiment_id && <span className="badge eau" style={{ marginLeft: 6 }}>💧 {batNom(c.batiment_id) || 'coupure'}</span>}
+                      </td>
                       <td>
                         {c.pris >= c.capacite ? <span className="badge ok">Complet</span> : c.pris > 0 ? <span className="badge">{c.pris}/{c.capacite}</span> : <span className="badge grey">Libre</span>}
                       </td>

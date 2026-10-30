@@ -58,7 +58,8 @@ export default function PlanningPanel({ ctx }: { ctx: StaffCtx }) {
     setTimeout(() => URL.revokeObjectURL(a.href), 1000);
   }
 
-  const cibles = data.creneaux.filter((c) => isFuture(c) && (c.pris < c.capacite || c.id === moving?.creneau_id));
+    const batDe = (r: Reservation | null) => (r ? lotsById.get(r.lot_id)?.batiment_id : undefined);
+  const cibles = data.creneaux.filter((c) => isFuture(c) && (c.pris < c.capacite || c.id === moving?.creneau_id) && (!c.batiment_id || c.batiment_id === batDe(moving)));
 
   return (
     <>
@@ -96,6 +97,9 @@ export default function PlanningPanel({ ctx }: { ctx: StaffCtx }) {
             <h3>
               {jourLong(j)}
               <span className="badge">{total} RDV</span>
+              {(data.coupures ?? []).filter((k) => k.jour === j).map((k) => (
+                <span key={k.id} className="badge eau">💧 Coupure {heure(k.debut)}–{heure(k.fin)}{k.batiment_id ? ` · ${data.batiments.find((b) => b.id === k.batiment_id)?.nom ?? ''}` : ''}</span>
+              ))}
             </h3>
             {visibles.map((c) => {
               const rs = resaParCreneau.get(c.id) ?? [];
@@ -105,6 +109,7 @@ export default function PlanningPanel({ ctx }: { ctx: StaffCtx }) {
                   <div className="time">
                     {heure(c.debut)} – {heure(c.fin)}
                     {c.capacite > 1 && <small>{rs.length}/{c.capacite} places</small>}
+                    {c.batiment_id && <small style={{ color: '#2f6f9a' }}>💧 {data.batiments.find((b) => b.id === c.batiment_id)?.nom}</small>}
                   </div>
                   <div>
                     {rs.map((r) => {

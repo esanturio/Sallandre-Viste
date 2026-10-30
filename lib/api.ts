@@ -17,6 +17,7 @@ const MESSAGES: Record<string, string> = {
   STATUT_INVALIDE: 'Merci d’indiquer si vous êtes locataire ou propriétaire.',
   CRENEAU_INTROUVABLE: 'Ce créneau n’existe plus. Merci d’en choisir un autre.',
   CRENEAU_PASSE: 'Ce créneau est déjà passé. Merci d’en choisir un autre.',
+  CRENEAU_AUTRE_BATIMENT: 'Ce créneau est réservé aux logements d’un autre bâtiment (coupure d’eau). Merci d’en choisir un autre.',
   CRENEAU_COMPLET: 'Ce créneau vient d’être pris par quelqu’un d’autre. Merci d’en choisir un autre.',
   LOT_INTROUVABLE: 'Ce logement est introuvable.',
   LOT_REQUIS: 'Merci de préciser votre logement (étage et numéro).',

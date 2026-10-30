@@ -5,13 +5,14 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import Header, { Footer } from './Header';
 import BookingForm from './BookingForm';
 import RecapCard from './RecapCard';
+import CoupuresBanner from './Coupures';
 import PlanningPanel from './PlanningPanel';
 import LotsPanel from './LotsPanel';
 import SlotsPanel from './SlotsPanel';
 import AccessPanel from './AccessPanel';
 import { Modal, Toast } from './ui';
 import { errMsg, rpc } from '@/lib/api';
-import { isFuture, mapsUrl, opSub, opTitle } from '@/lib/format';
+import { isFuture, mapsUrl, opSub, opTitle, parisToday } from '@/lib/format';
 import type { BookingInput, OpData, Recap } from '@/lib/types';
 
 export type StaffCtx = {
@@ -122,6 +123,9 @@ export default function StaffPage({ token, opId, role }: { token: string; opId?:
             {op.archived && <span className="badge grey">Archivée</span>}
           </div>
 
+          {(data.coupures ?? []).some((k) => k.jour >= parisToday()) && (
+            <CoupuresBanner coupures={(data.coupures ?? []).filter((k) => k.jour >= parisToday())} batiments={data.batiments} />
+          )}
           <div className="stats">
             <div className="stat"><div className="v">{nbResa}</div><div className="l">rendez-vous pris</div></div>
             <div className="stat"><div className="v">{enAttente}</div><div className="l">logement{enAttente > 1 ? 's' : ''} en attente{nbLots === 0 ? ' (liste vide)' : ''}</div></div>

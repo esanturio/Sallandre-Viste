@@ -267,3 +267,13 @@ table.list tr:last-child td { border-bottom: none; }
 .batitem .nm { font-weight: 700; color: var(--navy); }
 .batitem .info { font-size: 13px; color: var(--muted); }
 @media (max-width: 560px) { .etagerow.edit { grid-template-columns: 1fr auto; } .etagerow.edit .lotchips { grid-column: 1 / -1; } }
+
+/* ===== Coupures d'eau ===== */
+.notice.coupure { background: #e7f2fb; color: #0b4f7a; border: 1px solid #b9d9f0; }
+.notice.coupure .ct { font-weight: 700; margin-bottom: 4px; }
+.notice.coupure ul { margin: 0; padding-left: 18px; }
+.notice.coupure li { margin: 2px 0; }
+.notice.coupure .cb { color: #2f6f9a; }
+.badge.eau { background: #e7f2fb; color: #0b4f7a; }
+.slot .eau { display: block; font-size: 10px; font-weight: 600; color: #2f6f9a; }
+.slot.on .eau { color: rgba(255,255,255,.85); }

@@ -7,6 +7,8 @@ import type { StaffCtx } from './StaffPage';
 import { rpc } from '@/lib/api';
 import { opSub, opTitle } from '@/lib/format';
 import AddressInput from './AddressInput';
+import { coupureCible } from './Coupures';
+import { heure, jourLong } from '@/lib/format';
 
 function LinkBox({ url }: { url: string }) {
   const [copied, setCopied] = useState(false);
@@ -45,17 +47,22 @@ export default function AccessPanel({ ctx }: { ctx: StaffCtx }) {
   function affiche() {
     const w = window.open('', '_blank');
     if (!w) return;
+    const futures = (data.coupures ?? []).filter((k) => k.jour >= new Date().toISOString().slice(0, 10));
     const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]!));
+    const coupuresHtml = futures.length
+      ? `<div class="eau"><b>💧 Coupures d’eau prévues</b><ul>${futures.map((k) => `<li>${esc(jourLong(k.jour))} de ${heure(k.debut)} à ${heure(k.fin)}${coupureCible(k, data.batiments) ? ' — ' + esc(coupureCible(k, data.batiments)) : ''}</li>`).join('')}</ul></div>`
+      : '';
     w.document.write(`<!doctype html><html lang="fr"><head><meta charset="utf-8"><title>Affiche – ${esc(titre)}</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700;800&display=swap" rel="stylesheet">
 <style>@page{size:A4;margin:16mm}body{font-family:Montserrat,Arial,sans-serif;color:#1d2733;text-align:center;margin:0}
 .logo{width:220px;margin:10px auto 26px;display:block}h1{color:#134575;font-size:34px;margin:0 0 8px}h2{font-weight:500;font-size:20px;margin:0 0 28px;color:#5d6875}
 .box{border:3px solid #134575;border-radius:18px;padding:28px;margin:0 auto;max-width:540px}.qr{width:300px;height:300px}
-p{font-size:18px;line-height:1.5}.url{font-size:13px;color:#5d6875;word-break:break-all}.c{white-space:pre-wrap;font-size:15px;color:#5d6875;margin-top:24px}</style></head>
+p{font-size:18px;line-height:1.5}.url{font-size:13px;color:#5d6875;word-break:break-all}.c{white-space:pre-wrap;font-size:15px;color:#5d6875;margin-top:24px}.eau{margin:22px auto 0;max-width:540px;text-align:left;background:#e7f2fb;color:#0b4f7a;border-radius:12px;padding:14px 18px;font-size:16px}.eau ul{margin:6px 0 0;padding-left:20px}</style></head>
 <body><img class="logo" src="${origin}/logo-sallandre.png"><h1>${esc(op.objet)}</h1><h2>${esc(titre)}${sousTitre ? '<br>' + esc(sousTitre) : ''}</h2>
 <div class="box"><p><b>Prenez rendez-vous en 1 minute</b><br>Scannez ce QR code avec l’appareil photo de votre téléphone<br>et choisissez le créneau qui vous convient.</p>
 <img class="qr" src="${qr}"><p class="url">${esc(tenantUrl)}</p><p style="font-size:15px">Aucun compte à créer. En cas de difficulté, adressez-vous à votre gardien.</p></div>
 ${op.consignes ? `<div class="c">${esc(op.consignes)}</div>` : ''}
+${coupuresHtml}
 <script>window.onload=()=>setTimeout(()=>window.print(),400)</script></body></html>`);
     w.document.close();
   }

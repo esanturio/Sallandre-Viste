@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { errMsg, AppError } from '@/lib/api';
 import { ETAGES_POSSIBLES, etageLabel, groupBy, heure, isFuture, jourCourt, jourLong, parisNow } from '@/lib/format';
 import type { BookingInput, OpData, Recap, Statut } from '@/lib/types';
+import CoupuresBanner, { coupuresPour } from './Coupures';
 
 type Props = {
   data: OpData;
@@ -21,7 +22,8 @@ export default function BookingForm({ data, staff, initialCreneau, initialLot, s
   const singleBat = batiments.length === 1;
   const init = initialLot ? lots.find((l) => l.id === initialLot) : undefined;
 
-  const [batId, setBatId] = useState<string>(init?.batiment_id ?? (singleBat ? batiments[0]?.id ?? '' : ''));
+  const slot0 = initialCreneau ? creneaux.find((c) => c.id === initialCreneau) : undefined;
+  const [batId, setBatId] = useState<string>(init?.batiment_id ?? slot0?.batiment_id ?? (singleBat ? batiments[0]?.id ?? '' : ''));
   const [etageSel, setEtageSel] = useState<string>(init ? String(init.etage) : '');
   const [etageLibre, setEtageLibre] = useState<string>('');
   const [lotSel, setLotSel] = useState<string>(init?.id ?? '');
@@ -56,7 +58,15 @@ export default function BookingForm({ data, staff, initialCreneau, initialLot, s
 
   // Créneaux à venir, regroupés par jour
   const now = parisNow();
-  const futurs = useMemo(() => creneaux.filter((c) => isFuture(c, now) || c.id === initialCreneau), [creneaux, now, initialCreneau]);
+  // Un créneau lié à un bâtiment (coupure d'eau) n'est proposé qu'aux logements de ce bâtiment
+  const compatible = (c: { batiment_id?: string | null }) => !c.batiment_id || (!!effBat && c.batiment_id === effBat);
+  const futurs = useMemo(
+    () => creneaux.filter((c) => (isFuture(c, now) || c.id === initialCreneau) && compatible(c)),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [creneaux, now, initialCreneau, effBat],
+  );
+  const masquesAutresBat = !effBat && creneaux.some((c) => c.batiment_id && isFuture(c, now));
+  const coupuresBat = effBat ? coupuresPour(data.coupures, effBat) : [];
   const parJour = useMemo(() => groupBy(futurs, (c) => c.jour), [futurs]);
   const jours = Array.from(parJour.keys()).sort();
   const slotsDuJour = jour ? parJour.get(jour) ?? [] : [];
@@ -65,8 +75,11 @@ export default function BookingForm({ data, staff, initialCreneau, initialLot, s
   useEffect(() => {
     if (!creneau) return;
     const c = creneaux.find((x) => x.id === creneau);
-    if (!c || c.pris >= c.capacite) setCreneau('');
-  }, [creneaux, creneau]);
+    if (!c || c.pris >= c.capacite || (c.batiment_id && c.batiment_id !== effBat)) setCreneau('');
+  }, [creneaux, creneau, effBat]);
+  useEffect(() => {
+    if (jour && !parJour.has(jour)) setJour('');
+  }, [jour, parJour]);
   useEffect(() => {
     if (lotSel && lotSel !== 'autre') {
       const l = lots.find((x) => x.id === lotSel);
@@ -191,6 +204,8 @@ export default function BookingForm({ data, staff, initialCreneau, initialLot, s
       {/* 2. Créneau */}
       <div className="card">
         <div className="step-title">{n(2)}<h2>Date et créneau</h2></div>
+        {coupuresBat.length > 0 && <CoupuresBanner coupures={coupuresBat} batiments={batiments} titre={staff ? 'Coupures d’eau pour ce bâtiment' : 'Coupures d’eau pour votre bâtiment'} />}
+        {masquesAutresBat && <div className="notice info">Choisissez d’abord {staff ? 'le' : 'votre'} bâtiment pour voir tous les créneaux disponibles.</div>}
         {jours.length === 0 ? (
           <div className="notice warn">Aucun créneau n’est disponible pour le moment.</div>
         ) : (
@@ -220,6 +235,7 @@ export default function BookingForm({ data, staff, initialCreneau, initialLot, s
                         onClick={() => setCreneau(c.id)}>
                         {heure(c.debut)} – {heure(c.fin)}
                         <small>{restant <= 0 ? 'Complet' : staff && c.capacite > 1 ? `${restant} place${restant > 1 ? 's' : ''}` : 'Disponible'}</small>
+                        {c.batiment_id && <span className="eau">💧 pendant la coupure</span>}
                       </button>
                     );
                   })}

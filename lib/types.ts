@@ -25,7 +25,9 @@ export type Lot = {
   visite_at?: string | null;
 };
 
-export type Creneau = { id: string; jour: string; debut: string; fin: string; capacite: number; pris: number };
+export type Creneau = { id: string; jour: string; debut: string; fin: string; capacite: number; pris: number; batiment_id?: string | null };
+
+export type Coupure = { id: string; batiment_id: string | null; jour: string; debut: string; fin: string };
 
 export type Statut = 'locataire' | 'proprietaire' | 'autre';
 
@@ -48,6 +50,7 @@ export type OpData = {
   lots: Lot[];
   creneaux: Creneau[];
   reservations: Reservation[];
+  coupures?: Coupure[];
   role?: 'admin' | 'concierge' | 'tech';
 };
 
@@ -72,6 +75,7 @@ export type Recap = {
   debut: string;
   fin: string;
   batiment: string;
+  batiment_id?: string;
   etage: number;
   numero: string;
   nom: string;
