@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import type { StaffCtx } from './StaffPage';
 import { Modal } from './ui';
+import BatimentEditor from './BatimentEditor';
 import BatimentGen, { defaultSpec, genTotal, runGen, type GenSpec } from './BatimentGen';
 import { rpc } from '@/lib/api';
 import { ETAGES_POSSIBLES, etageLabel, groupBy, heure, jourCourt, parseNumeros, sortLots } from '@/lib/format';
@@ -16,6 +17,7 @@ export default function LotsPanel({ ctx }: { ctx: StaffCtx }) {
   const seulDefautVide = data.batiments.length === 1 && data.batiments[0].nom === 'Bâtiment unique' && data.lots.length === 0;
   const [gTarget, setGTarget] = useState<string>(''); // '' = nouveau bâtiment, sinon id à compléter
   const [gSpec, setGSpec] = useState<GenSpec>(defaultSpec(seulDefautVide ? '' : `Bâtiment ${'ABCDEFGHIJ'[data.batiments.length] ?? data.batiments.length + 1}`));
+  const [editBat, setEditBat] = useState<string | null>(null);
   const [eVisite, setEVisite] = useState<string>('');
   const [eNote, setENote] = useState('');
 
@@ -84,23 +86,37 @@ export default function LotsPanel({ ctx }: { ctx: StaffCtx }) {
 
   return (
     <>
+      {!seulDefautVide && (
+        <div className="card no-print">
+          <h2>Bâtiments</h2>
+          <p className="hint">Pour changer le nom, le nombre d’étages ou de logements par étage, ou renommer des lots : « Modifier ».</p>
+          <div className="batlist">
+            {data.batiments.map((b) => {
+              const ls = data.lots.filter((l) => l.batiment_id === b.id);
+              const ets = Array.from(new Set(ls.map((l) => l.etage))).sort((x, y) => x - y);
+              return (
+                <div className="batitem" key={b.id}>
+                  <div className="grow">
+                    <div className="nm">{b.nom}</div>
+                    <div className="info">
+                      {ls.length === 0 ? 'Aucun logement' : `${ls.length} logement${ls.length > 1 ? 's' : ''} · ${ets.length > 1 ? `${etageLabel(ets[0])} → ${etageLabel(ets[ets.length - 1])}` : etageLabel(ets[0])}`}
+                    </div>
+                  </div>
+                  <button className="btn ghost sm" onClick={() => setEditBat(b.id)}>Modifier</button>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       <div className="card no-print">
         <h2>{seulDefautVide ? 'Décrire l’immeuble' : 'Ajouter un bâtiment'}</h2>
         <p className="hint">
           Indiquez les étages et le nombre de logements par étage : la liste est générée automatiquement.
           Elle sert à suivre qui est inscrit, qui reste à relancer et ce que le technicien a vu. Elle peut aussi rester vide : les occupants saisissent alors leur logement eux-mêmes.
         </p>
-        {data.batiments.some((b) => data.lots.some((l) => l.batiment_id === b.id)) && (
-          <div className="field">
-            <div className="seg">
-              <button type="button" className={gTarget === '' ? 'on' : ''} onClick={() => setGTarget('')}>Nouveau bâtiment</button>
-              {data.batiments.map((b) => (
-                <button type="button" key={b.id} className={gTarget === b.id ? 'on' : ''} onClick={() => setGTarget(b.id)}>Compléter {b.nom}</button>
-              ))}
-            </div>
-          </div>
-        )}
-        <BatimentGen spec={gSpec} onChange={setGSpec} showNom={!gTarget} nomFacultatif={seulDefautVide} />
+        <BatimentGen spec={gSpec} onChange={setGSpec} nomFacultatif={seulDefautVide} />
         <button className="btn" disabled={genTotal(gSpec) === 0} onClick={generer}>
           Générer {genTotal(gSpec)} logement{genTotal(gSpec) > 1 ? 's' : ''}
         </button>
@@ -265,6 +281,16 @@ export default function LotsPanel({ ctx }: { ctx: StaffCtx }) {
           </div>
           {editing.reserve && <p className="muted small">Ce logement a un rendez-vous : annulez-le d’abord pour pouvoir le supprimer.</p>}
         </Modal>
+      )}
+      {editBat && data.batiments.find((b) => b.id === editBat) && (
+        <BatimentEditor
+          token={token} opId={opId}
+          batiment={data.batiments.find((b) => b.id === editBat)!}
+          lots={data.lots.filter((l) => l.batiment_id === editBat)}
+          seulBatiment={data.batiments.length === 1}
+          onClose={() => setEditBat(null)}
+          onDone={async (m) => { await ctx.reload(); notify(m); }}
+        />
       )}
     </>
   );

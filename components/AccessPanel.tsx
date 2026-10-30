@@ -31,7 +31,6 @@ export default function AccessPanel({ ctx }: { ctx: StaffCtx }) {
   const titre = opTitle(op);
   const sousTitre = opSub(op);
   const [f, setF] = useState({ immeuble: op.immeuble ?? '', adresse: op.adresse ?? '', objet: op.objet, consignes: op.consignes ?? '' });
-  const [newBat, setNewBat] = useState('');
 
   useEffect(() => setOrigin(window.location.origin), []);
   const tenantUrl = origin ? `${origin}/r/${op.tenant_token}` : '';
@@ -116,38 +115,6 @@ ${op.consignes ? `<div class="c">${esc(op.consignes)}</div>` : ''}
         <button className="btn" onClick={() => act(() => rpc('admin_save_operation', {
           p_token: token, p_op: opId, p_immeuble: f.immeuble, p_adresse: f.adresse, p_objet: f.objet, p_consignes: f.consignes, p_archived: op.archived, p_batiments: null,
         }), 'Enregistré')}>Enregistrer</button>
-      </div>
-
-      <div className="card">
-        <h2>Bâtiments</h2>
-        <p className="hint">S’il n’y a qu’un bâtiment, les occupants ne verront pas cette étape.</p>
-        <table className="list">
-          <tbody>
-            {data.batiments.map((b) => (
-              <tr key={b.id}>
-                <td>
-                  <input type="text" defaultValue={b.nom} onBlur={(e) => {
-                    const v = e.target.value.trim();
-                    if (v && v !== b.nom) act(() => rpc('admin_save_batiment', { p_token: token, p_op: opId, p_id: b.id, p_nom: v }), 'Bâtiment renommé');
-                  }} />
-                </td>
-                <td className="muted small" style={{ whiteSpace: 'nowrap' }}>{data.lots.filter((l) => l.batiment_id === b.id).length} lots</td>
-                <td style={{ width: 1 }}>
-                  {data.batiments.length > 1 && (
-                    <button className="btn danger sm" onClick={() => confirm(`Supprimer « ${b.nom} » et ses logements ?`) &&
-                      act(() => rpc('admin_delete_batiment', { p_token: token, p_op: opId, p_id: b.id }), 'Bâtiment supprimé')}>Supprimer</button>
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        <div className="flex" style={{ marginTop: 12, flexWrap: 'nowrap' }}>
-          <input type="text" value={newBat} onChange={(e) => setNewBat(e.target.value)} placeholder="ex. Bâtiment B" />
-          <button className="btn ghost" disabled={!newBat.trim()} onClick={async () => {
-            if (await act(() => rpc('admin_save_batiment', { p_token: token, p_op: opId, p_id: null, p_nom: newBat }), 'Bâtiment ajouté')) setNewBat('');
-          }}>Ajouter</button>
-        </div>
       </div>
 
       <div className="card">
