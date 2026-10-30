@@ -1,0 +1,78 @@
+export type Operation = {
+  id: string;
+  immeuble: string;
+  adresse: string | null;
+  objet: string;
+  consignes: string | null;
+  archived: boolean;
+  concierge_token?: string;
+  tenant_token?: string;
+};
+
+export type Batiment = { id: string; nom: string; ordre: number };
+
+export type Lot = { id: string; batiment_id: string; etage: number; numero: string; reserve: boolean };
+
+export type Creneau = { id: string; jour: string; debut: string; fin: string; capacite: number; pris: number };
+
+export type Statut = 'locataire' | 'proprietaire' | 'autre';
+
+export type Reservation = {
+  id: string;
+  creneau_id: string;
+  lot_id: string;
+  nom: string;
+  telephone: string;
+  email: string | null;
+  statut: Statut;
+  commentaire: string | null;
+  created_by: 'locataire' | 'concierge' | 'admin';
+  created_at: string;
+};
+
+export type OpData = {
+  operation: Operation;
+  batiments: Batiment[];
+  lots: Lot[];
+  creneaux: Creneau[];
+  reservations: Reservation[];
+  role?: 'admin' | 'concierge';
+};
+
+export type OpSummary = {
+  id: string;
+  immeuble: string;
+  adresse: string | null;
+  objet: string;
+  archived: boolean;
+  created_at: string;
+  nb_lots: number;
+  nb_reservations: number;
+  nb_creneaux: number;
+  premier_jour: string | null;
+  dernier_jour: string | null;
+};
+
+export type Recap = {
+  reservation_id: string;
+  jour: string;
+  debut: string;
+  fin: string;
+  batiment: string;
+  etage: number;
+  numero: string;
+  nom: string;
+};
+
+export type BookingInput = {
+  creneau: string;
+  lot: string | null;
+  batiment: string | null;
+  etage: number | null;
+  numero: string | null;
+  nom: string;
+  tel: string;
+  email: string;
+  statut: Statut;
+  comm: string;
+};
