@@ -4,6 +4,8 @@ import { useState } from 'react';
 import type { StaffCtx } from './StaffPage';
 import { Modal } from './ui';
 import BatimentEditor from './BatimentEditor';
+import ImportCard from './ImportCard';
+import RelanceCard from './RelanceCard';
 import BatimentGen, { defaultSpec, genTotal, runGen, type GenSpec } from './BatimentGen';
 import { rpc } from '@/lib/api';
 import { ETAGES_POSSIBLES, etageLabel, groupBy, heure, jourCourt, parseNumeros, sortLots } from '@/lib/format';
@@ -19,6 +21,9 @@ export default function LotsPanel({ ctx }: { ctx: StaffCtx }) {
   const [editBat, setEditBat] = useState<string | null>(null);
   const [eVisite, setEVisite] = useState<string>('');
   const [eNote, setENote] = useState('');
+  const [oNom, setONom] = useState('');
+  const [oTel, setOTel] = useState('');
+  const [oMail, setOMail] = useState('');
 
   const [aBat, setABat] = useState(data.batiments[0]?.id ?? '');
   const [aDe, setADe] = useState('0');
@@ -66,6 +71,9 @@ export default function LotsPanel({ ctx }: { ctx: StaffCtx }) {
     setENum(l.numero);
     setEVisite(l.visite ?? '');
     setENote(l.visite_note ?? '');
+    setONom(l.occupant_nom ?? '');
+    setOTel(l.occupant_tel ?? '');
+    setOMail(l.occupant_email ?? '');
   }
 
   async function generer() {
@@ -119,6 +127,9 @@ export default function LotsPanel({ ctx }: { ctx: StaffCtx }) {
           Générer {genTotal(gSpec)} logement{genTotal(gSpec) > 1 ? 's' : ''}
         </button>
       </div>
+
+      <ImportCard ctx={ctx} />
+      <RelanceCard ctx={ctx} tenantToken={ctx.isAdmin ? data.operation.tenant_token : data.tenant_token} />
 
       <details className="card no-print">
         <summary style={{ cursor: 'pointer', fontWeight: 700, color: 'var(--navy)' }}>Ajouter des logements un par un</summary>
@@ -207,6 +218,8 @@ export default function LotsPanel({ ctx }: { ctx: StaffCtx }) {
                           ) : (
                             <div className="s">
                               En attente
+                              {l.occupant_nom && <><br />{l.occupant_nom}</>}
+                              {l.occupant_tel && <><br /><a href={`tel:${l.occupant_tel.replace(/[^\d+]/g, '')}`}>{l.occupant_tel}</a></>}
                               <div style={{ marginTop: 6 }} className="no-print">
                                 <button className="btn ghost sm" onClick={() => openBooking({ lot: l.id })}>Inscrire</button>
                               </div>
@@ -245,6 +258,12 @@ export default function LotsPanel({ ctx }: { ctx: StaffCtx }) {
               <input type="text" value={eNum} onChange={(e) => setENum(e.target.value)} />
             </div>
           </div>
+          <div className="lbl" style={{ marginTop: 4 }}>Occupant connu <span className="opt" style={{ fontWeight: 400, color: 'var(--muted)' }}>(pour la relance — facultatif)</span></div>
+          <div className="row3">
+            <div className="field"><label>Nom</label><input type="text" value={oNom} onChange={(e) => setONom(e.target.value)} maxLength={120} autoComplete="off" /></div>
+            <div className="field"><label>Téléphone</label><input type="tel" value={oTel} onChange={(e) => setOTel(e.target.value)} maxLength={30} autoComplete="off" /></div>
+            <div className="field"><label>E-mail</label><input type="email" value={oMail} onChange={(e) => setOMail(e.target.value)} maxLength={160} autoComplete="off" /></div>
+          </div>
           <div className="field">
             <label>Visite du technicien</label>
             <div className="seg">
@@ -261,6 +280,9 @@ export default function LotsPanel({ ctx }: { ctx: StaffCtx }) {
               onClick={async () => {
                 if ((eVisite || null) !== (editing.visite ?? null) || (eNote || '') !== (editing.visite_note ?? '')) {
                   if (!(await act(() => rpc('staff_set_visite', { p_token: token, p_op: opId, p_lot: editing.id, p_statut: (eVisite || null) as Visite, p_note: eNote })))) return;
+                }
+                if (oNom !== (editing.occupant_nom ?? '') || oTel !== (editing.occupant_tel ?? '') || oMail !== (editing.occupant_email ?? '')) {
+                  if (!(await act(() => rpc('staff_set_occupant', { p_token: token, p_op: opId, p_lot: editing.id, p_nom: oNom, p_tel: oTel, p_email: oMail })))) return;
                 }
                 if (await act(() => rpc('staff_update_lot', { p_token: token, p_op: opId, p_lot: editing.id, p_batiment: eBat, p_etage: parseInt(eEtage, 10), p_numero: eNum }), 'Logement modifié')) setEditing(null);
               }}>

@@ -6,6 +6,7 @@ import type { StaffCtx } from './StaffPage';
 import { rpc } from '@/lib/api';
 import AddressInput from './AddressInput';
 import PosterCard from './PosterCard';
+import BailleurPicker from './BailleurPicker';
 import { LinkBox } from './ui';
 
 export default function AccessPanel({ ctx }: { ctx: StaffCtx }) {
@@ -52,6 +53,11 @@ export default function AccessPanel({ ctx }: { ctx: StaffCtx }) {
           <div className="field"><label>Objet de la visite</label><input type="text" value={f.objet} onChange={(e) => setF({ ...f, objet: e.target.value })} /></div>
         </div>
         <div className="field"><label>Adresse de l’immeuble</label><AddressInput value={f.adresse} onChange={(v) => setF({ ...f, adresse: v })} /></div>
+        <div className="field">
+          <label>Bailleur <span className="opt">(son logo s’affiche à côté du vôtre : page de réservation, affiche, espaces gardien et technicien)</span></label>
+          <BailleurPicker token={token} value={op.bailleur_id ?? null}
+            onChange={(id) => act(() => rpc('admin_set_bailleur', { p_token: token, p_op: opId, p_bailleur: id }), id ? 'Bailleur associé' : 'Bailleur retiré')} />
+        </div>
         <div className="field">
           <label>Contact pour les occupants <span className="opt">(facultatif — affiché sur la page, la confirmation et l’affiche)</span></label>
           <input type="text" value={f.contact} onChange={(e) => setF({ ...f, contact: e.target.value })} maxLength={200}

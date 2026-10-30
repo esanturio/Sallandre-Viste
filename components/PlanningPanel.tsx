@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import type { StaffCtx } from './StaffPage';
 import { Modal } from './ui';
+import AbsentsCard from './AbsentsCard';
 import { rpc } from '@/lib/api';
 import { opTitle, ORIGINE_LABEL, etageLabel, groupBy, heure, isFuture, jourCourt, jourLong, lotLabel, parisToday, sortLots } from '@/lib/format';
 import type { Reservation } from '@/lib/types';
@@ -63,6 +64,7 @@ export default function PlanningPanel({ ctx }: { ctx: StaffCtx }) {
 
   return (
     <>
+      <AbsentsCard ctx={ctx} tenantToken={ctx.isAdmin ? data.operation.tenant_token : data.tenant_token} />
       <div className="flex no-print" style={{ marginBottom: 14 }}>
         <label className="flex small" style={{ gap: 6 }}>
           <input type="checkbox" checked={masquerLibres} onChange={(e) => setMasquerLibres(e.target.checked)} /> Masquer les créneaux libres
@@ -121,6 +123,7 @@ export default function PlanningPanel({ ctx }: { ctx: StaffCtx }) {
                             <span className="who">{r.nom}</span>
                             {l?.visite === 'vu' && <span className="badge vu">Visité ✓</span>}
                             {l?.visite === 'absent' && <span className="badge absent">Absent</span>}
+                            {(l?.absences ?? 0) > 0 && l?.visite !== 'absent' && <span className="badge warn">{(l?.absences ?? 0) + 1}e passage</span>}
                           </div>
                           <div className="meta">
                             <a href={`tel:${r.telephone.replace(/\s/g, '')}`}>{r.telephone}</a>

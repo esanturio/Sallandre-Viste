@@ -26,7 +26,7 @@ function VisiteCard({ lot, batiments, resa, creneau, onSet, onDelete }: {
   return (
     <div className={`techcard ${lot.visite ?? ''}`}>
       <div className="h">
-        <span className="lot">{lotLabel(lot, batiments)}</span>
+        <span className="lot">{lotLabel(lot, batiments)}{(lot.absences ?? 0) > 0 && <span className="badge warn" style={{ marginLeft: 6 }}>{(lot.absences ?? 0) + 1}e passage</span>}</span>
         {creneau && <span className="t">{heure(creneau.debut)}</span>}
       </div>
       {resa ? (
@@ -37,7 +37,11 @@ function VisiteCard({ lot, batiments, resa, creneau, onSet, onDelete }: {
         </div>
       ) : (
         <div className="flex small muted" style={{ justifyContent: 'space-between' }}>
-          <span>Pas de rendez-vous</span>
+          <span>
+            Pas de rendez-vous
+            {lot.occupant_nom && <> · {lot.occupant_nom}</>}
+            {lot.occupant_tel && <> · <a href={`tel:${lot.occupant_tel.replace(/[^\d+]/g, '')}`}>{lot.occupant_tel}</a></>}
+          </span>
           {onDelete && <button className="linkbtn small" style={{ color: 'var(--err)' }} onClick={() => onDelete(lot)}>Supprimer ce logement</button>}
         </div>
       )}
@@ -162,7 +166,7 @@ export default function TechPage({ token }: { token: string }) {
 
   return (
     <>
-      <Header kicker="Espace technicien" title={opTitle(op)} />
+      <Header kicker="Espace technicien" title={opTitle(op)} partenaire={op.bailleur} />
       <main>
         <div className="wrap narrow">
           <div className="card" style={{ padding: 16 }}>

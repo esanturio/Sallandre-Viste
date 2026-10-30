@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 import Header, { Footer } from './Header';
 import AddressInput from './AddressInput';
+import BailleurPicker, { BailleursManager } from './BailleurPicker';
+import { Modal } from './ui';
 import BatimentGen, { defaultSpec, genTotal, runGen, type GenSpec } from './BatimentGen';
 import { errMsg, rpc } from '@/lib/api';
 import { jourCourt, opSub, opTitle } from '@/lib/format';
@@ -19,6 +21,8 @@ export default function AdminHome({ token }: { token: string }) {
   const [f, setF] = useState({ adresse: '', immeuble: '', objet: 'Visite technique', consignes: '', contact: '' });
   const [structure, setStructure] = useState<'plus_tard' | 'maintenant'>('maintenant');
   const [bats, setBats] = useState<GenSpec[]>([defaultSpec()]);
+  const [bailleur, setBailleur] = useState<string | null>(null);
+  const [gererBailleurs, setGererBailleurs] = useState(false);
   const [busy, setBusy] = useState(false);
   const [formErr, setFormErr] = useState('');
 
@@ -43,6 +47,9 @@ export default function AdminHome({ token }: { token: string }) {
       const id = await rpc<string>('admin_save_operation', {
         p_token: token, p_op: null, p_immeuble: f.immeuble, p_adresse: f.adresse, p_objet: f.objet, p_consignes: f.consignes, p_archived: false, p_batiments: null,
       });
+      if (bailleur) {
+        try { await rpc('admin_set_bailleur', { p_token: token, p_op: id, p_bailleur: bailleur }); } catch { /* modifiable ensuite */ }
+      }
       if (f.contact.trim()) {
         try { await rpc('admin_set_contact', { p_token: token, p_op: id, p_contact: f.contact }); } catch { /* modifiable ensuite */ }
       }
@@ -98,6 +105,10 @@ export default function AdminHome({ token }: { token: string }) {
                   <label htmlFor="objet">Objet de la visite</label>
                   <input id="objet" type="text" value={f.objet} onChange={(e) => setF({ ...f, objet: e.target.value })} placeholder="ex. Audit plomberie, relevé compteurs…" />
                 </div>
+              </div>
+              <div className="field">
+                <label>Bailleur <span className="opt">(facultatif — son logo s’affiche à côté du vôtre)</span></label>
+                <BailleurPicker token={token} value={bailleur} onChange={setBailleur} />
               </div>
               <div className="field">
                 <label htmlFor="contact">Contact pour les occupants <span className="opt">(facultatif)</span></label>
@@ -163,6 +174,7 @@ export default function AdminHome({ token }: { token: string }) {
                     {sub && <div className="addr">{sub}</div>}
                   </div>
                   <div className="flex" style={{ gap: 6 }}>
+                    {o.bailleur && <span className="badge grey">{o.bailleur}</span>}
                     {o.archived && <span className="badge grey">Archivée</span>}
                     <span className="badge">{o.objet}</span>
                   </div>
@@ -185,6 +197,15 @@ export default function AdminHome({ token }: { token: string }) {
             <button className="linkbtn small" onClick={() => setShowArch(!showArch)}>
               {showArch ? 'Masquer les opérations archivées' : `Afficher les opérations archivées (${nbArch})`}
             </button>
+          )}
+
+          <div className="flex" style={{ marginTop: 18 }}>
+            <button className="btn ghost sm" onClick={() => setGererBailleurs(true)}>Gérer les bailleurs et logos</button>
+          </div>
+          {gererBailleurs && (
+            <Modal title="Bailleurs et logos" onClose={() => setGererBailleurs(false)} wide>
+              <BailleursManager token={token} />
+            </Modal>
           )}
 
           <div className="notice info" style={{ marginTop: 24 }}>

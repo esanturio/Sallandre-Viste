@@ -38,6 +38,13 @@ const MESSAGES: Record<string, string> = {
   CAPACITE_TROP_BASSE: 'Il y a déjà plus de rendez-vous que cette capacité.',
   CRENEAU_A_DES_RESERVATIONS: 'Impossible : un ou plusieurs de ces créneaux ont des rendez-vous. Déplacez-les ou annulez-les d’abord.',
   TYPE_INVALIDE: 'Action invalide.',
+  NOM_REQUIS_BAILLEUR: 'Merci d’indiquer le nom du bailleur.',
+  LOGO_INVALIDE: 'Ce logo n’est pas valide ou est trop lourd. Essayez une image PNG ou JPG plus petite.',
+  BAILLEUR_EXISTE: 'Un bailleur porte déjà ce nom.',
+  BAILLEUR_INTROUVABLE: 'Bailleur introuvable.',
+  IMPORT_VIDE: 'Aucune ligne à importer.',
+  IMPORT_TROP_GROS: 'Fichier trop gros (3 000 lignes maximum par import).',
+  PAS_DE_RDV: 'Ce logement n’a pas de rendez-vous à déplacer.',
   TEXTE_TROP_LONG: 'Un des champs est trop long. Merci de le raccourcir.',
 };
 

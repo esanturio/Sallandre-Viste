@@ -14,10 +14,20 @@ L'adresse identifie l'immeuble (suggestions via la Base Adresse Nationale / Géo
 
 Règles : un logement = une visite ; un créneau ne peut pas dépasser sa capacité (contrôlé en base).
 
+## Bailleurs, import, absents
+
+- **Bailleurs** : nom + logo enregistrés une fois, réutilisables d'une campagne à l'autre ; le logo s'affiche à côté de celui de Sallandre (pages, affiche).
+- **Import** de la liste du bailleur (Excel .xlsx ou CSV) : colonnes reconnues automatiquement, logements créés ou complétés, coordonnées conservées pour la relance.
+- **Absents** : déplacer sur un nouveau créneau ou libérer le RDV (l'occupant reprend un créneau via le lien) ; compteur de passages.
+
+## Activité hebdomadaire
+
+Tâche planifiée Vercel (`vercel.json`, lundi 6h UTC) → `/api/keepalive` → fonction `keepalive` : crée une fausse opération puis la supprime, et journalise le passage dans `keepalive_log`. Variables Vercel : `CRON_SECRET`, `KEEPALIVE_SECRET`.
+
 ## Données personnelles
 
 - **Supprimer définitivement** une opération efface tout : rendez-vous (nom, téléphone, e-mail, commentaire), logements et notes de visite, créneaux, coupures, bâtiments. Les liens cessent de fonctionner.
-- **Effacer les données personnelles** anonymise les rendez-vous et notes d'une opération terminée en gardant les statistiques.
+- **Effacer les données personnelles** anonymise les rendez-vous, notes et coordonnées importées d'une opération terminée en gardant les statistiques.
 - Aucune donnée n'est stockée dans le navigateur.
 
 ## Technique

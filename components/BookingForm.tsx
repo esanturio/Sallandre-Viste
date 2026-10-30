@@ -44,9 +44,9 @@ export default function BookingForm({ data, staff, initialCreneau, initialLot, s
   const [jour, setJour] = useState<string>(slot0?.jour ?? '');
   const [creneau, setCreneau] = useState<string>(slot0?.id ?? '');
 
-  const [nom, setNom] = useState('');
-  const [tel, setTel] = useState('');
-  const [email, setEmail] = useState('');
+  const [nom, setNom] = useState(staff ? init?.occupant_nom ?? '' : '');
+  const [tel, setTel] = useState(staff ? init?.occupant_tel ?? '' : '');
+  const [email, setEmail] = useState(staff ? init?.occupant_email ?? '' : '');
   const [comm, setComm] = useState('');
   const [err, setErr] = useState('');
   const [busy, setBusy] = useState(false);

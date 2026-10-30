@@ -54,7 +54,7 @@ export default function TenantPage({ token }: { token: string }) {
   const op = data.operation;
   return (
     <>
-      <Header />
+      <Header partenaire={op.bailleur} />
       <section className="hero">
         <div className="wrap narrow">
           <span className="objet">{op.objet}</span>

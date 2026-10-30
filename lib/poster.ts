@@ -30,7 +30,7 @@ export function ouvrirAffiche(opts: {
 @page{size:A4;margin:14mm}
 *{box-sizing:border-box}
 body{font-family:Montserrat,Arial,sans-serif;color:#1d2733;text-align:center;margin:0;padding:16px}
-.logo{width:170px;margin:0 auto 16px;display:block}
+.logos{display:flex;align-items:center;justify-content:center;gap:18px;margin:0 auto 16px}.logo{width:170px;display:block}.logo.partner{width:auto;max-width:200px;max-height:90px;object-fit:contain}.logos .x{font-size:28px;color:#8aa6c4;font-weight:300}
 .objet{display:block;background:#134575;color:#fff;font-weight:800;font-size:40px;line-height:1.15;letter-spacing:.02em;text-transform:uppercase;padding:18px 22px;border-radius:16px;margin:0 auto 18px;max-width:640px}
 h1{color:#134575;font-size:24px;margin:0 0 4px}
 h2{font-weight:500;font-size:17px;margin:0 0 20px;color:#5d6875}
@@ -48,7 +48,7 @@ p{font-size:18px;line-height:1.45;margin:0 0 12px}
 </style></head>
 <body>
 <div class="bar"><button onclick="window.print()">Imprimer / enregistrer en PDF</button></div>
-<img class="logo" src="${origin}/logo-sallandre.png" alt="Sallandre">
+<div class="logos"><img class="logo" src="${origin}/logo-sallandre.png" alt="Sallandre">${op.bailleur?.logo ? `<span class="x">×</span><img class="logo partner" src="${op.bailleur.logo}" alt="${esc(op.bailleur.nom)}">` : ''}</div>
 <div class="objet">${esc(op.objet)}</div>
 <h1>${esc(titre)}</h1>
 ${sous ? `<h2>${esc(sous)}</h2>` : '<div style="height:20px"></div>'}

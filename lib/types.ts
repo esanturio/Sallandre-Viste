@@ -6,6 +6,8 @@ export type Operation = {
   consignes: string | null;
   contact?: string | null;
   archived: boolean;
+  bailleur_id?: string | null;
+  bailleur?: { nom: string; logo: string | null } | null;
   concierge_token?: string;
   tenant_token?: string;
   tech_token?: string;
@@ -24,7 +26,13 @@ export type Lot = {
   visite?: Visite;
   visite_note?: string | null;
   visite_at?: string | null;
+  absences?: number;
+  occupant_nom?: string | null;
+  occupant_tel?: string | null;
+  occupant_email?: string | null;
 };
+
+export type Bailleur = { id: string; nom: string; logo: string | null; nb_operations?: number };
 
 export type Creneau = { id: string; jour: string; debut: string; fin: string; capacite: number; pris: number; batiment_id?: string | null };
 
@@ -63,6 +71,7 @@ export type OpSummary = {
   objet: string;
   archived: boolean;
   created_at: string;
+  bailleur?: string | null;
   nb_lots: number;
   nb_vus: number;
   nb_reservations: number;

@@ -110,6 +110,7 @@ export default function StaffPage({ token, opId, role }: { token: string; opId?:
       <Header
         kicker={isAdmin ? 'Administration' : 'Espace gardien'}
         title={opTitle(op)}
+        partenaire={op.bailleur}
         right={
           <>
             {isAdmin && <Link className="btn ghost sm" href={`/admin/${token}`}>← Toutes les opérations</Link>}
