@@ -17,6 +17,18 @@ type Props = {
   onConflict?: () => void;
 };
 
+/** Met en forme un numéro français : 0612345678 → 06 12 34 56 78 ; +33612345678 → +33 6 12 34 56 78 */
+function formatTel(v: string): string {
+  const t = v.replace(/[^\d+]/g, '');
+  if (t.startsWith('+33')) {
+    const d = t.slice(3).replace(/\D/g, '').slice(0, 9);
+    return ('+33 ' + d.slice(0, 1) + ' ' + (d.slice(1).match(/.{1,2}/g) ?? []).join(' ')).trim();
+  }
+  if (t.startsWith('+')) return v.replace(/[^\d+ ]/g, '');
+  const d = t.replace(/\D/g, '').slice(0, 10);
+  return (d.match(/.{1,2}/g) ?? []).join(' ');
+}
+
 export default function BookingForm({ data, staff, initialCreneau, initialLot, submitLabel, onSubmit, onBooked, onConflict }: Props) {
   const { batiments, lots, creneaux } = data;
   const singleBat = batiments.length === 1;
@@ -249,16 +261,16 @@ export default function BookingForm({ data, staff, initialCreneau, initialLot, s
         <div className="step-title">{n(3)}<h2>{staff ? 'Coordonnées de l’occupant' : 'Vos coordonnées'}</h2></div>
         <div className="field">
           <label htmlFor="nom">Nom et prénom</label>
-          <input id="nom" type="text" value={nom} onChange={(e) => setNom(e.target.value)} autoComplete="name" maxLength={120} />
+          <input id="nom" name={staff ? undefined : 'name'} type="text" value={nom} onChange={(e) => setNom(e.target.value)} autoComplete={staff ? 'off' : 'name'} autoCapitalize="words" maxLength={120} />
         </div>
         <div className="row">
           <div className="field">
             <label htmlFor="tel">Téléphone</label>
-            <input id="tel" type="tel" value={tel} onChange={(e) => setTel(e.target.value)} autoComplete="tel" inputMode="tel" maxLength={30} />
+            <input id="tel" name={staff ? undefined : 'tel'} type="tel" value={tel} onChange={(e) => setTel(formatTel(e.target.value))} autoComplete={staff ? 'off' : 'tel'} inputMode="tel" placeholder="06 12 34 56 78" maxLength={20} />
           </div>
           <div className="field">
             <label htmlFor="email">E-mail <span className="opt">(facultatif)</span></label>
-            <input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" maxLength={160} />
+            <input id="email" name={staff ? undefined : 'email'} type="email" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete={staff ? 'off' : 'email'} inputMode="email" autoCapitalize="none" maxLength={160} />
           </div>
         </div>
         <div className="field">
