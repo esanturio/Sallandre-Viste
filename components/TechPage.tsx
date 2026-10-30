@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import Header, { Footer } from './Header';
 import { Toast } from './ui';
 import CoupuresBanner from './Coupures';
-import { errMsg, rpc } from '@/lib/api';
+import { AppError, errMsg, rpc } from '@/lib/api';
 import { ETAGES_POSSIBLES, etageLabel, groupBy, heure, jourCourt, jourLong, lotLabel, mapsUrl, opSub, opTitle, parisToday, sortLots } from '@/lib/format';
 import type { Batiment, Creneau, Lot, OpData, Reservation, Visite } from '@/lib/types';
 
@@ -70,7 +70,10 @@ export default function TechPage({ token }: { token: string }) {
 
   const load = useCallback(async () => {
     try { setData(await rpc<OpData>('tech_operation', { p_token: token })); setErr(''); }
-    catch (e) { setErr(errMsg(e)); }
+    catch (e) {
+      setErr(errMsg(e));
+      if (e instanceof AppError && e.code === 'ACCES_REFUSE') setData(null);
+    }
   }, [token]);
   useEffect(() => { load(); }, [load]);
   useEffect(() => {

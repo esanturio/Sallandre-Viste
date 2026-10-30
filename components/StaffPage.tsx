@@ -10,8 +10,9 @@ import PlanningPanel from './PlanningPanel';
 import LotsPanel from './LotsPanel';
 import SlotsPanel from './SlotsPanel';
 import AccessPanel from './AccessPanel';
+import PosterCard from './PosterCard';
 import { Modal, Toast } from './ui';
-import { errMsg, rpc } from '@/lib/api';
+import { AppError, errMsg, rpc } from '@/lib/api';
 import { isFuture, mapsUrl, opSub, opTitle, parisToday } from '@/lib/format';
 import type { BookingInput, OpData, Recap } from '@/lib/types';
 
@@ -26,7 +27,7 @@ export type StaffCtx = {
   notify: (m: string) => void;
 };
 
-type Tab = 'planning' | 'lots' | 'reglages';
+type Tab = 'planning' | 'lots' | 'reglages' | 'affiche';
 
 export default function StaffPage({ token, opId, role }: { token: string; opId?: string; role: 'admin' | 'concierge' }) {
   const [data, setData] = useState<OpData | null>(null);
@@ -44,6 +45,8 @@ export default function StaffPage({ token, opId, role }: { token: string; opId?:
       setErr('');
     } catch (e) {
       setErr(errMsg(e));
+      // Lien renouvelé ou opération supprimée : on n'affiche plus les anciennes données
+      if (e instanceof AppError && e.code === 'ACCES_REFUSE') setData(null);
     }
   }, [token, opId]);
 
@@ -141,10 +144,12 @@ export default function StaffPage({ token, opId, role }: { token: string; opId?:
             <button className={tab === 'planning' ? 'on' : ''} onClick={() => setTab('planning')}>Planning<span className="cnt">{nbResa}</span></button>
             <button className={tab === 'lots' ? 'on' : ''} onClick={() => setTab('lots')}>Suivi des logements<span className="cnt">{enAttente}</span></button>
             {isAdmin && <button className={tab === 'reglages' ? 'on' : ''} onClick={() => setTab('reglages')}>Créneaux, liens et réglages</button>}
+            {!isAdmin && data.tenant_token && <button className={tab === 'affiche' ? 'on' : ''} onClick={() => setTab('affiche')}>Affiche QR et lien</button>}
           </div>
 
           {tab === 'planning' && <PlanningPanel ctx={ctx} />}
           {tab === 'lots' && <LotsPanel ctx={ctx} />}
+          {tab === 'affiche' && !isAdmin && data.tenant_token && <PosterCard data={data} tenantToken={data.tenant_token} />}
           {tab === 'reglages' && isAdmin && (
             <>
               <SlotsPanel ctx={ctx} />

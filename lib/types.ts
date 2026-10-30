@@ -51,6 +51,7 @@ export type OpData = {
   creneaux: Creneau[];
   reservations: Reservation[];
   coupures?: Coupure[];
+  tenant_token?: string; // fourni au gardien pour l'affiche QR
   role?: 'admin' | 'concierge' | 'tech';
 };
 

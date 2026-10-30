@@ -5,7 +5,7 @@ import Header, { Footer } from './Header';
 import BookingForm from './BookingForm';
 import RecapCard from './RecapCard';
 import CoupuresBanner, { coupuresPour } from './Coupures';
-import { errMsg, rpc } from '@/lib/api';
+import { AppError, errMsg, rpc } from '@/lib/api';
 import { mapsUrl, opSub, opTitle } from '@/lib/format';
 import type { BookingInput, OpData, Recap } from '@/lib/types';
 
@@ -20,6 +20,7 @@ export default function TenantPage({ token }: { token: string }) {
       setErr('');
     } catch (e) {
       setErr(errMsg(e));
+      if (e instanceof AppError && e.code === 'LIEN_INVALIDE') setData(null);
     }
   }, [token]);
 

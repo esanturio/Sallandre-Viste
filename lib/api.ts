@@ -14,7 +14,7 @@ const MESSAGES: Record<string, string> = {
   LIEN_INVALIDE: "Ce lien n'est plus valide. Rapprochez-vous de votre gardien ou du gestionnaire.",
   NOM_REQUIS: 'Merci d’indiquer votre nom.',
   TELEPHONE_INVALIDE: 'Merci d’indiquer un numéro de téléphone valide.',
-  STATUT_INVALIDE: 'Merci d’indiquer si vous êtes locataire ou propriétaire.',
+  STATUT_INVALIDE: 'Statut invalide.',
   CRENEAU_INTROUVABLE: 'Ce créneau n’existe plus. Merci d’en choisir un autre.',
   CRENEAU_PASSE: 'Ce créneau est déjà passé. Merci d’en choisir un autre.',
   CRENEAU_AUTRE_BATIMENT: 'Ce créneau est réservé aux logements d’un autre bâtiment (coupure d’eau). Merci d’en choisir un autre.',
@@ -38,6 +38,7 @@ const MESSAGES: Record<string, string> = {
   CAPACITE_TROP_BASSE: 'Il y a déjà plus de rendez-vous que cette capacité.',
   CRENEAU_A_DES_RESERVATIONS: 'Impossible : un ou plusieurs de ces créneaux ont des rendez-vous. Déplacez-les ou annulez-les d’abord.',
   TYPE_INVALIDE: 'Action invalide.',
+  TEXTE_TROP_LONG: 'Un des champs est trop long. Merci de le raccourcir.',
 };
 
 export class AppError extends Error {
@@ -56,7 +57,8 @@ export async function rpc<T>(fn: string, args: Record<string, unknown>): Promise
     throw new AppError('RESEAU');
   }
   if (res.error) {
-    const code = (res.error.message || '').trim();
+    let code = (res.error.message || '').trim();
+    if (res.error.code === '23514' || /violates check constraint/.test(code)) code = 'TEXTE_TROP_LONG';
     if (!MESSAGES[code]) console.error(fn, res.error);
     throw new AppError(code);
   }

@@ -15,7 +15,6 @@ export default function LotsPanel({ ctx }: { ctx: StaffCtx }) {
   const [fBat, setFBat] = useState('');
   const [fStat, setFStat] = useState<'tous' | 'attente' | 'inscrits' | 'avoir' | 'vus'>('tous');
   const seulDefautVide = data.batiments.length === 1 && data.batiments[0].nom === 'Bâtiment unique' && data.lots.length === 0;
-  const [gTarget, setGTarget] = useState<string>(''); // '' = nouveau bâtiment, sinon id à compléter
   const [gSpec, setGSpec] = useState<GenSpec>(defaultSpec(seulDefautVide ? '' : `Bâtiment ${'ABCDEFGHIJ'[data.batiments.length] ?? data.batiments.length + 1}`));
   const [editBat, setEditBat] = useState<string | null>(null);
   const [eVisite, setEVisite] = useState<string>('');
@@ -71,16 +70,15 @@ export default function LotsPanel({ ctx }: { ctx: StaffCtx }) {
 
   async function generer() {
     const nom = gSpec.nom.trim() || (seulDefautVide ? 'Bâtiment unique' : '');
-    if (!gTarget && !nom) { alert('Merci de donner un nom au bâtiment.'); return; }
+    if (!nom) { alert('Merci de donner un nom au bâtiment.'); return; }
     let r: { crees: number } = { crees: 0 };
     const ok = await act(async () => {
-      r = await runGen(token, opId, gTarget || null, nom, gSpec);
+      r = await runGen(token, opId, null, nom, gSpec);
     });
     if (ok) {
       const total = genTotal(gSpec);
       notify(r.crees === total ? `${r.crees} logements créés` : `${r.crees} créés, ${total - r.crees} existaient déjà`);
-      setGTarget('');
-      setGSpec(defaultSpec(`Bâtiment ${'ABCDEFGHIJ'[data.batiments.length + (gTarget ? 0 : 1)] ?? ''}`.trim()));
+      setGSpec(defaultSpec(`Bâtiment ${'ABCDEFGHIJ'[data.batiments.length + 1] ?? ''}`.trim()));
     }
   }
 

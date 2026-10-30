@@ -44,8 +44,13 @@ export default function AdminHome({ token }: { token: string }) {
         p_token: token, p_op: null, p_immeuble: f.immeuble, p_adresse: f.adresse, p_objet: f.objet, p_consignes: f.consignes, p_archived: false, p_batiments: null,
       });
       if (structure === 'maintenant') {
-        for (const b of bats) {
-          if (genTotal(b) > 0) await runGen(token, id, null, b.nom.trim() || 'Bâtiment unique', b);
+        try {
+          for (const b of bats) {
+            if (genTotal(b) > 0) await runGen(token, id, null, b.nom.trim() || 'Bâtiment unique', b);
+          }
+        } catch (genErr) {
+          // L'opération existe déjà : on l'ouvre plutôt que de risquer un doublon
+          alert(`L’opération est créée, mais les logements n’ont pas tous pu être générés : ${errMsg(genErr)}\nVous pourrez les compléter dans « Suivi des logements ».`);
         }
       }
       router.push(`/admin/${token}/${id}`);

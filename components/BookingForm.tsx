@@ -41,9 +41,8 @@ export default function BookingForm({ data, staff, initialCreneau, initialLot, s
   const [lotSel, setLotSel] = useState<string>(init?.id ?? '');
   const [numeroLibre, setNumeroLibre] = useState('');
 
-  const initSlot = initialCreneau ? creneaux.find((c) => c.id === initialCreneau) : undefined;
-  const [jour, setJour] = useState<string>(initSlot?.jour ?? '');
-  const [creneau, setCreneau] = useState<string>(initSlot?.id ?? '');
+  const [jour, setJour] = useState<string>(slot0?.jour ?? '');
+  const [creneau, setCreneau] = useState<string>(slot0?.id ?? '');
 
   const [nom, setNom] = useState('');
   const [tel, setTel] = useState('');
@@ -132,7 +131,7 @@ export default function BookingForm({ data, staff, initialCreneau, initialLot, s
       onBooked(r);
     } catch (ex) {
       setErr(errMsg(ex));
-      if (ex instanceof AppError && ['CRENEAU_COMPLET', 'CRENEAU_PASSE', 'CRENEAU_INTROUVABLE', 'LOT_DEJA_RESERVE'].includes(ex.code)) {
+      if (ex instanceof AppError && ['CRENEAU_COMPLET', 'CRENEAU_PASSE', 'CRENEAU_INTROUVABLE', 'CRENEAU_AUTRE_BATIMENT', 'LOT_DEJA_RESERVE'].includes(ex.code)) {
         if (ex.code !== 'LOT_DEJA_RESERVE') setCreneau('');
         onConflict?.();
       }
